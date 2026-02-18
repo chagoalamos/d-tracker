@@ -1,0 +1,61 @@
+[
+  {
+    "title": "One Piece",
+    "status": "visto",
+    "rating": 5,
+    "episodes": 1150,
+    "notes": "Me gusta mucho One Piece, es mi animé favorito.",
+    "imageUrl": "https://cdn.myanimelist.net/images/anime/1405/149053l.jpg",
+    "updatedAt": "2026-02-18T05:15:28.685Z",
+    "createdAt": "2026-02-18T05:43:00.122Z",
+    "id": 31
+  },
+  {
+    "title": "Days",
+    "status": "visto",
+    "rating": 2,
+    "episodes": 24,
+    "notes": "Sirvió para pasar el rato, no tiene continuidad despues de la temporada 1.",
+    "crUrl": "",
+    "imageUrl": "https://cdn.myanimelist.net/images/anime/11/88507l.jpg",
+    "updatedAt": "2026-02-18T05:43:00.122Z",
+    "createdAt": "2026-02-18T05:43:00.122Z",
+    "id": 32
+  },
+  {
+    "title": "Yowapeda",
+    "status": "pendiente",
+    "rating": 3,
+    "episodes": 10,
+    "notes": "Bueno, pero la segunda temporada es mas de lo mismo.",
+    "crUrl": "",
+    "imageUrl": "https://cdn.myanimelist.net/images/anime/5/53211l.jpg",
+    "updatedAt": "2026-02-18T05:54:19.182Z",
+    "createdAt": "2026-02-18T05:54:19.182Z",
+    "id": 33
+  },
+  {
+    "title": "Gachiakuta",
+    "status": "visto",
+    "rating": 5,
+    "episodes": 24,
+    "notes": "Me encantó, esperando la siguiente temporada.",
+    "crUrl": "",
+    "imageUrl": "https://cdn.myanimelist.net/images/anime/1682/150432l.jpg",
+    "updatedAt": "2026-02-18T05:55:48.285Z",
+    "createdAt": "2026-02-18T05:55:48.285Z",
+    "id": 34
+  },
+  {
+    "title": "Dr. Stone",
+    "status": "visto",
+    "rating": 5,
+    "episodes": 82,
+    "notes": "Muy bueno, recomendadisimo.",
+    "crUrl": "",
+    "imageUrl": "https://cdn.myanimelist.net/images/anime/1613/102576l.jpg",
+    "updatedAt": "2026-02-18T05:57:37.361Z",
+    "createdAt": "2026-02-18T05:57:37.361Z",
+    "id": 35
+  }
+]
