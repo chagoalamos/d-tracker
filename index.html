@@ -23,25 +23,20 @@
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
         body { transition: background-color 0.3s, color 0.3s; }
-        
-        .anime-card {
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
-        }
+        .anime-card { transition: all 0.3s ease; border-bottom: 3px solid transparent; }
         .dark .anime-card { background-color: #23252b; }
         .light .anime-card { background-color: #ffffff; border: 1px solid #e5e7eb; }
-
-        .anime-card:hover {
-            transform: translateY(-5px);
-            border-color: #f47521;
-        }
-
-        .poster-container { aspect-ratio: 2 / 3; overflow: hidden; }
+        .anime-card:hover { transform: translateY(-5px); border-color: #f47521; }
+        .poster-container { aspect-ratio: 2 / 3; overflow: hidden; position: relative; }
         .poster-image { width: 100%; height: 100%; object-fit: cover; }
-        
         .modal-bg { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
+        
+        /* Estilo para la etiqueta de Crunchyroll */
+        .cr-badge {
+            background: linear-gradient(90deg, #f47521, #cb5a0b);
+            box-shadow: 0 2px 10px rgba(244, 117, 33, 0.4);
+        }
     </style>
 </head>
 <body class="dark bg-crDarkGrey text-white min-h-screen flex flex-col font-sans">
@@ -54,7 +49,6 @@
                 <h1 class="text-2xl font-black tracking-tighter uppercase italic text-black dark:text-white">D <span class="text-crOrange">Tracker</span></h1>
             </div>
 
-            <!-- Buscador -->
             <div class="flex-1 max-w-md relative">
                 <input type="text" id="searchInput" oninput="loadSeries()" placeholder="Buscar en mi colección..." 
                     class="w-full bg-gray-100 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded-full py-2 px-10 outline-none focus:border-crOrange text-black dark:text-white">
@@ -73,9 +67,8 @@
     </header>
 
     <main class="container mx-auto px-4 mt-6 flex-grow">
-        
         <!-- Panel de Estadísticas -->
-        <section id="statsPanel" class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-100 dark:bg-crBlack p-4 rounded-xl border border-gray-200 dark:border-gray-800">
+        <section id="statsPanel" class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-100 dark:bg-crBlack p-4 rounded-xl border border-gray-200 dark:border-gray-800 text-black dark:text-white">
             <div class="text-center">
                 <p class="text-[10px] uppercase font-bold text-gray-500">Total</p>
                 <p id="statTotal" class="text-2xl font-black text-crOrange">0</p>
@@ -94,14 +87,13 @@
             </div>
         </section>
 
-        <!-- Filtros y Ordenación -->
+        <!-- Filtros -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div class="flex flex-wrap gap-2 items-center">
                 <button onclick="setFilterStatus('all')" id="status-all" class="filter-btn-status px-4 py-1.5 rounded-full text-xs font-bold border-2 border-crOrange bg-crOrange text-white">Todos</button>
                 <button onclick="setFilterStatus('visto')" id="status-visto" class="filter-btn-status px-4 py-1.5 rounded-full text-xs font-bold border-2 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400">Vistos</button>
                 <button onclick="setFilterStatus('pendiente')" id="status-pendiente" class="filter-btn-status px-4 py-1.5 rounded-full text-xs font-bold border-2 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400">Pendientes</button>
             </div>
-
             <div class="flex items-center gap-2">
                 <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Ordenar:</span>
                 <select id="sortSelect" onchange="loadSeries()" class="bg-white dark:bg-crBlack border border-gray-300 dark:border-gray-700 rounded p-1.5 text-xs text-black dark:text-white outline-none">
@@ -113,10 +105,7 @@
         </div>
 
         <!-- Grid -->
-        <div id="seriesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-            <!-- Inyectado por JS -->
-        </div>
-
+        <div id="seriesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"></div>
         <div id="emptyState" class="hidden text-center py-20">
             <i class="fas fa-search text-6xl text-gray-300 dark:text-gray-700 mb-4"></i>
             <p class="text-xl text-gray-500 font-medium italic">No se encontraron resultados...</p>
@@ -125,7 +114,7 @@
 
     <!-- Footer -->
     <footer class="bg-gray-100 dark:bg-crBlack border-t border-gray-200 dark:border-gray-800 py-8 mt-12">
-        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
             <div class="flex gap-4">
                 <button onclick="exportData()" class="text-gray-600 dark:text-gray-400 hover:text-crOrange text-xs font-bold uppercase flex items-center gap-2 transition-colors">
                     <i class="fas fa-download"></i> Exportar JSON
@@ -143,7 +132,7 @@
     <div id="modal" class="fixed inset-0 modal-bg z-[100] hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-crBlack w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
             <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-crBlack">
-                <h2 id="modalTitle" class="text-xl font-black italic uppercase text-black dark:text-white">Añadir Serie</h2>
+                <h2 id="modalTitle" class="text-xl font-black italic uppercase text-black dark:text-white">Detalles de Serie</h2>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-crOrange transition-colors">
                     <i class="fas fa-times text-xl"></i>
                 </button>
@@ -163,40 +152,45 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Imagen URL</label>
-                        <input type="url" id="imageUrl" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white focus:border-crOrange outline-none text-sm">
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Crunchyroll URL (Opcional)</label>
+                        <input type="url" id="crUrl" placeholder="Enlace directo al anime..." class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white focus:border-crOrange outline-none text-sm">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="col-span-1">
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Estado</label>
-                        <select id="status" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white outline-none">
-                            <option value="pendiente">Pendiente</option>
-                            <option value="visto">Visto</option>
-                        </select>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Imagen URL</label>
+                        <input type="url" id="imageUrl" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white focus:border-crOrange outline-none text-sm">
                     </div>
-                    <div class="col-span-1">
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Episodios</label>
-                        <input type="number" id="episodes" value="0" min="0" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white outline-none">
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Calificación</label>
-                        <div id="starRatingContainer" class="flex items-center gap-1.5 mt-1 text-gray-300 dark:text-gray-600">
-                            <!-- Estrellas -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Estado</label>
+                            <select id="status" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white outline-none">
+                                <option value="pendiente">Pendiente</option>
+                                <option value="visto">Visto</option>
+                            </select>
                         </div>
-                        <input type="hidden" id="rating" value="5">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Episodios</label>
+                            <input type="number" id="episodes" value="0" min="0" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white outline-none">
+                        </div>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Reseña / Notas Personales</label>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Calificación</label>
+                    <div id="starRatingContainer" class="flex items-center gap-1.5 mt-1"></div>
+                    <input type="hidden" id="rating" value="5">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Reseña / Notas</label>
                     <textarea id="notes" rows="3" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-3 text-black dark:text-white focus:border-crOrange outline-none resize-none" placeholder="¿Qué te pareció esta serie?"></textarea>
                 </div>
 
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="closeModal()" class="flex-1 py-3 text-gray-500 font-bold uppercase text-xs tracking-widest hover:text-black dark:hover:text-white transition-colors">Cerrar</button>
-                    <button type="submit" id="submitBtn" class="flex-1 bg-crOrange text-white py-3 rounded-lg font-black uppercase text-xs tracking-widest shadow-lg shadow-orange-500/20 hover:brightness-110 transition-all">Guardar Cambios</button>
+                    <button type="submit" id="submitBtn" class="flex-1 bg-crOrange text-white py-3 rounded-lg font-black uppercase text-xs tracking-widest shadow-lg shadow-orange-500/20 hover:brightness-110 transition-all">Guardar</button>
                 </div>
             </form>
         </div>
@@ -204,13 +198,11 @@
 
     <script>
         const DB_NAME = 'DTrackerProDB';
-        const DB_VERSION = 2;
+        const DB_VERSION = 3; // Actualizado para incluir crUrl
         const STORE_NAME = 'series';
         let db;
-        
         let currentFilterStatus = 'all';
 
-        // Tema
         function toggleTheme() {
             const isDark = document.body.classList.toggle('dark');
             document.body.classList.toggle('light');
@@ -218,7 +210,6 @@
             localStorage.setItem('dtracker-theme', isDark ? 'dark' : 'light');
         }
 
-        // Inicializar DB
         const request = indexedDB.open(DB_NAME, DB_VERSION);
         request.onupgradeneeded = (e) => {
             const db = e.target.result;
@@ -232,12 +223,10 @@
             loadSeries();
         };
 
-        // UI Estrellas
         function setupStarRating(val = 5) {
             const container = document.getElementById('starRatingContainer');
             container.innerHTML = '';
             document.getElementById('rating').value = val;
-
             for (let i = 1; i <= 5; i++) {
                 const star = document.createElement('i');
                 star.className = `fas fa-star text-lg cursor-pointer transition-colors ${i <= val ? 'text-yellow-500' : 'text-gray-300 dark:text-gray-600'}`;
@@ -246,13 +235,11 @@
             }
         }
 
-        // Fetch API
         async function autoFetchAnime() {
             const title = document.getElementById('title').value;
             if (!title) return;
             const magicBtn = document.getElementById('magicBtn');
             magicBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
             try {
                 const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
                 const { data } = await res.json();
@@ -266,17 +253,13 @@
             magicBtn.innerHTML = '<i class="fas fa-magic"></i>';
         }
 
-        // CRUD
         function openModal(id = null) {
-            const form = document.getElementById('seriesForm');
-            form.reset();
+            document.getElementById('seriesForm').reset();
             document.getElementById('editingId').value = '';
             document.getElementById('modalTitle').innerText = "Añadir Serie";
             setupStarRating(5);
-
             if (id) {
-                const store = db.transaction([STORE_NAME], 'readonly').objectStore(STORE_NAME);
-                store.get(Number(id)).onsuccess = (e) => {
+                db.transaction([STORE_NAME]).objectStore(STORE_NAME).get(Number(id)).onsuccess = (e) => {
                     const data = e.target.result;
                     document.getElementById('editingId').value = data.id;
                     document.getElementById('title').value = data.title;
@@ -284,6 +267,7 @@
                     document.getElementById('imageUrl').value = data.imageUrl;
                     document.getElementById('episodes').value = data.episodes || 0;
                     document.getElementById('notes').value = data.notes || '';
+                    document.getElementById('crUrl').value = data.crUrl || '';
                     setupStarRating(data.rating || 5);
                     document.getElementById('modalTitle').innerText = "Editar Serie";
                 };
@@ -302,10 +286,10 @@
                 rating: parseInt(document.getElementById('rating').value),
                 episodes: parseInt(document.getElementById('episodes').value) || 0,
                 notes: document.getElementById('notes').value,
+                crUrl: document.getElementById('crUrl').value,
                 imageUrl: document.getElementById('imageUrl').value || 'https://via.placeholder.com/300x450?text=No+Image',
                 updatedAt: new Date().toISOString()
             };
-
             const tx = db.transaction([STORE_NAME], 'readwrite');
             const store = tx.objectStore(STORE_NAME);
             if (id) { data.id = Number(id); store.put(data); }
@@ -324,36 +308,21 @@
         }
 
         function loadSeries() {
-            const request = db.transaction([STORE_NAME], 'readonly').objectStore(STORE_NAME).getAll();
-            request.onsuccess = () => {
-                let series = request.result;
+            db.transaction([STORE_NAME]).objectStore(STORE_NAME).getAll().onsuccess = (e) => {
+                let series = e.target.result;
                 const search = document.getElementById('searchInput').value.toLowerCase();
                 const sort = document.getElementById('sortSelect').value;
 
-                // Filtrar
                 if (currentFilterStatus !== 'all') series = series.filter(s => s.status === currentFilterStatus);
                 if (search) series = series.filter(s => s.title.toLowerCase().includes(search));
 
-                // Ordenar
                 if (sort === 'alpha') series.sort((a, b) => a.title.localeCompare(b.title));
                 else if (sort === 'rating') series.sort((a, b) => b.rating - a.rating);
                 else series.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
 
-                updateStats(request.result);
+                updateStats(e.target.result);
                 renderGrid(series);
             };
-        }
-
-        function updateStats(all) {
-            const total = all.length;
-            const visto = all.filter(s => s.status === 'visto').length;
-            const eps = all.reduce((acc, curr) => acc + (curr.episodes || 0), 0);
-            const avg = total > 0 ? (all.reduce((acc, curr) => acc + curr.rating, 0) / total).toFixed(1) : "0.0";
-
-            document.getElementById('statTotal').innerText = total;
-            document.getElementById('statVisto').innerText = visto;
-            document.getElementById('statAvg').innerText = avg;
-            document.getElementById('statEps').innerText = eps;
         }
 
         function renderGrid(series) {
@@ -368,17 +337,32 @@
             empty.classList.add('hidden');
 
             series.forEach(item => {
+                // Lógica de enlace a Crunchyroll
+                const crLink = item.crUrl ? item.crUrl : `https://www.crunchyroll.com/search?q=${encodeURIComponent(item.title)}`;
+                
                 const card = document.createElement('div');
                 card.className = 'anime-card rounded-xl overflow-hidden relative group flex flex-col shadow-lg cursor-pointer';
                 card.onclick = () => openModal(item.id);
                 
                 card.innerHTML = `
-                    <div class="poster-container relative">
+                    <div class="poster-container">
                         <img src="${item.imageUrl}" class="poster-image transition-transform duration-700 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/300x450?text=Error'">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
-                            <p class="text-[10px] text-gray-300 line-clamp-3 italic">${item.notes || 'Sin notas...'}</p>
+                        
+                        <!-- Etiqueta Disponibilidad CR -->
+                        <div class="absolute top-2 left-2 z-10">
+                            <span class="cr-badge text-[8px] font-black text-white px-2 py-1 rounded shadow-lg uppercase tracking-wider flex items-center gap-1">
+                                <i class="fas fa-play-circle"></i> En CR
+                            </span>
                         </div>
-                        <div class="absolute top-2 right-2 flex flex-col gap-1">
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-3">
+                            <a href="${crLink}" target="_blank" onclick="event.stopPropagation()" class="bg-crOrange hover:bg-white hover:text-crOrange text-white text-[10px] font-black py-2 rounded mb-2 text-center transition-all uppercase">
+                                <i class="fas fa-external-link-alt mr-1"></i> Ver Capítulo
+                            </a>
+                            <p class="text-[9px] text-gray-300 line-clamp-2 italic mb-1">${item.notes || 'Sin notas...'}</p>
+                        </div>
+
+                        <div class="absolute top-2 right-2 flex flex-col gap-1 z-20">
                             <button onclick="event.stopPropagation(); deleteSeries(${item.id})" class="bg-black/60 hover:bg-red-500 text-white w-7 h-7 rounded-full flex items-center justify-center transition-colors">
                                 <i class="fas fa-trash-alt text-[10px]"></i>
                             </button>
@@ -386,11 +370,11 @@
                     </div>
                     <div class="p-3 bg-white dark:bg-crBlack">
                         <h3 class="font-bold text-xs truncate mb-1 text-black dark:text-white">${item.title}</h3>
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="text-[9px] font-black tracking-tighter uppercase px-1.5 py-0.5 rounded ${item.status === 'visto' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${item.status === 'visto' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}">
                                 Ep: ${item.episodes || 0}
                             </span>
-                            <div class="flex text-[9px] text-yellow-500">
+                            <div class="flex text-[8px] text-yellow-500">
                                 ${Array(5).fill(0).map((_, i) => `<i class="${i < item.rating ? 'fas' : 'far'} fa-star"></i>`).join('')}
                             </div>
                         </div>
@@ -400,6 +384,13 @@
             });
         }
 
+        function updateStats(all) {
+            document.getElementById('statTotal').innerText = all.length;
+            document.getElementById('statVisto').innerText = all.filter(s => s.status === 'visto').length;
+            document.getElementById('statEps').innerText = all.reduce((acc, curr) => acc + (curr.episodes || 0), 0);
+            document.getElementById('statAvg').innerText = all.length > 0 ? (all.reduce((acc, curr) => acc + curr.rating, 0) / all.length).toFixed(1) : "0.0";
+        }
+
         function deleteSeries(id) {
             if(!confirm('¿Eliminar serie?')) return;
             const tx = db.transaction([STORE_NAME], 'readwrite');
@@ -407,23 +398,12 @@
             tx.oncomplete = () => loadSeries();
         }
 
-        // Export/Import
         function exportData() {
             db.transaction([STORE_NAME], 'readonly').objectStore(STORE_NAME).getAll().onsuccess = (e) => {
-                const now = new Date();
-                const day = String(now.getDate()).padStart(2, '0');
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const year = now.getFullYear();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                
-                const timestamp = `${day}-${month}-${year}_${hours}-${minutes}`;
-                const fileName = `d-tracker-backup_${timestamp}.json`;
-
                 const blob = new Blob([JSON.stringify(e.target.result, null, 2)], { type: 'application/json' });
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = fileName;
+                a.download = `d-tracker-backup_${new Date().getTime()}.json`;
                 a.click();
             };
         }
