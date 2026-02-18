@@ -43,6 +43,15 @@
             to { transform: translate(-50%, 0); opacity: 1; }
         }
         .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
+
+        /* Estilo del Logo de Luffy */
+        .luffy-logo {
+            filter: drop-shadow(0 0 2px rgba(244, 117, 33, 0.5));
+            transition: transform 0.3s ease;
+        }
+        .luffy-logo:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
     </style>
 </head>
 <body class="dark bg-crDarkGrey text-white min-h-screen flex flex-col font-sans">
@@ -50,8 +59,24 @@
     <!-- Header -->
     <header class="bg-white dark:bg-crBlack border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
         <div class="container mx-auto px-4 h-20 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-                <i class="fas fa-layer-group text-3xl text-crOrange"></i>
+            <div class="flex items-center gap-3">
+                <!-- Logo de Luffy (SVG) -->
+                <div class="luffy-logo w-12 h-12 flex items-center justify-center">
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <!-- Sombrero de Paja -->
+                        <path d="M10,60 Q10,35 50,35 Q90,35 90,60" fill="#f4d03f" stroke="#000" stroke-width="2"/>
+                        <rect x="25" y="52" width="50" height="8" fill="#e74c3c" stroke="#000" stroke-width="1"/>
+                        <!-- Cara -->
+                        <path d="M25,60 Q25,85 50,85 Q75,85 75,60" fill="#fdebd0" stroke="#000" stroke-width="2"/>
+                        <!-- Ojos -->
+                        <circle cx="40" cy="65" r="3" fill="#000"/>
+                        <circle cx="60" cy="65" r="3" fill="#000"/>
+                        <!-- Cicatriz -->
+                        <path d="M35,72 L45,72 M40,70 L40,74" stroke="#000" stroke-width="1"/>
+                        <!-- Gran Sonrisa -->
+                        <path d="M35,75 Q50,82 65,75" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
                 <h1 class="text-2xl font-black tracking-tighter uppercase italic text-black dark:text-white">D <span class="text-crOrange">Tracker</span></h1>
             </div>
 
@@ -122,7 +147,7 @@
         </div>
     </main>
 
-    <!-- Notificación Deshacer (Undo Toast) -->
+    <!-- Notificación Deshacer -->
     <div id="undoToast" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] hidden">
         <div class="bg-crBlack border border-gray-700 shadow-2xl rounded-full px-6 py-3 flex items-center gap-4 animate-slide-up">
             <span class="text-sm font-medium">Serie movida a la papelera</span>
@@ -145,7 +170,7 @@
                     <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(this)">
                 </label>
             </div>
-            <p class="text-gray-400 text-[10px] uppercase tracking-[0.2em]">D Tracker Pro &copy; 2024</p>
+            <p class="text-gray-400 text-[10px] uppercase tracking-[0.2em]">D Tracker Pro &copy; 2026</p>
         </div>
     </footer>
 
@@ -224,9 +249,7 @@
                 <h2 class="text-xl font-black uppercase italic text-black dark:text-white"><i class="fas fa-trash-alt mr-2 text-crOrange"></i> Papelera</h2>
                 <button onclick="closeTrashModal()" class="text-gray-400 hover:text-crOrange transition-colors"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div id="trashList" class="p-6 max-h-[60vh] overflow-y-auto space-y-3 no-scrollbar bg-white dark:bg-crBlack">
-                <!-- Se llena dinámicamente -->
-            </div>
+            <div id="trashList" class="p-6 max-h-[60vh] overflow-y-auto space-y-3 no-scrollbar bg-white dark:bg-crBlack"></div>
             <div class="p-4 bg-gray-50 dark:bg-crDarkGrey border-t border-gray-200 dark:border-gray-800 flex justify-end gap-2">
                 <button onclick="emptyTrash()" class="text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 hover:bg-red-500/10 rounded transition-colors">Vaciar permanentemente</button>
             </div>
@@ -253,12 +276,8 @@
         const request = indexedDB.open(DB_NAME, DB_VERSION);
         request.onupgradeneeded = (e) => {
             const db = e.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-            }
-            if (!db.objectStoreNames.contains(TRASH_STORE)) {
-                db.createObjectStore(TRASH_STORE, { keyPath: 'id' });
-            }
+            if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+            if (!db.objectStoreNames.contains(TRASH_STORE)) db.createObjectStore(TRASH_STORE, { keyPath: 'id' });
         };
         request.onsuccess = (e) => {
             db = e.target.result;
@@ -426,13 +445,10 @@
             });
         }
 
-        // --- FUNCIONALIDADES DE PAPELERA Y UNDO ---
-
         function moveToTrash(id) {
             const tx = db.transaction([STORE_NAME, TRASH_STORE], 'readwrite');
             const seriesStore = tx.objectStore(STORE_NAME);
             const trashStore = tx.objectStore(TRASH_STORE);
-
             seriesStore.get(id).onsuccess = (e) => {
                 const item = e.target.result;
                 if (item) {
@@ -442,20 +458,14 @@
                     showUndoToast();
                 }
             };
-
-            tx.oncomplete = () => {
-                loadSeries();
-                updateTrashBadge();
-            };
+            tx.oncomplete = () => { loadSeries(); updateTrashBadge(); };
         }
 
         function showUndoToast() {
             const toast = document.getElementById('undoToast');
             toast.classList.remove('hidden');
             clearTimeout(undoTimeout);
-            undoTimeout = setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 6000);
+            undoTimeout = setTimeout(() => toast.classList.add('hidden'), 6000);
         }
 
         function undoDelete() {
@@ -463,7 +473,6 @@
             const tx = db.transaction([STORE_NAME, TRASH_STORE], 'readwrite');
             const seriesStore = tx.objectStore(STORE_NAME);
             const trashStore = tx.objectStore(TRASH_STORE);
-
             trashStore.get(lastDeletedId).onsuccess = (e) => {
                 const item = e.target.result;
                 if (item) {
@@ -471,96 +480,61 @@
                     trashStore.delete(lastDeletedId);
                 }
             };
-
             tx.oncomplete = () => {
                 document.getElementById('undoToast').classList.add('hidden');
-                loadSeries();
-                updateTrashBadge();
-                lastDeletedId = null;
+                loadSeries(); updateTrashBadge(); lastDeletedId = null;
             };
         }
 
-        function openTrashModal() {
-            renderTrashList();
-            document.getElementById('trashModal').classList.remove('hidden');
-        }
+        function openTrashModal() { renderTrashList(); document.getElementById('trashModal').classList.remove('hidden'); }
 
         function renderTrashList() {
             const list = document.getElementById('trashList');
-            list.innerHTML = '<p class="text-center text-gray-500 py-10 italic">Cargando papelera...</p>';
-            
+            list.innerHTML = '';
             db.transaction([TRASH_STORE]).objectStore(TRASH_STORE).getAll().onsuccess = (e) => {
                 const items = e.target.result;
-                list.innerHTML = '';
-                if (items.length === 0) {
-                    list.innerHTML = '<p class="text-center text-gray-500 py-10 italic">La papelera está vacía</p>';
-                } else {
-                    items.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = 'flex items-center justify-between p-3 bg-gray-50 dark:bg-crDarkGrey rounded-xl border border-gray-200 dark:border-gray-800';
-                        div.innerHTML = `
-                            <div class="flex items-center gap-3">
-                                <img src="${item.imageUrl}" class="w-10 h-14 object-cover rounded shadow" onerror="this.src='https://via.placeholder.com/100'">
-                                <div>
-                                    <p class="font-bold text-xs text-black dark:text-white">${item.title}</p>
-                                    <p class="text-[9px] text-gray-500 uppercase tracking-tighter">Eliminada recientemente</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="restoreFromTrash(${item.id})" class="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors" title="Restaurar">
-                                    <i class="fas fa-undo"></i>
-                                </button>
-                                <button onclick="permanentDelete(${item.id})" class="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" title="Eliminar para siempre">
-                                    <i class="fas fa-times-circle"></i>
-                                </button>
-                            </div>
-                        `;
-                        list.appendChild(div);
-                    });
-                }
+                if (items.length === 0) list.innerHTML = '<p class="text-center text-gray-500 py-10 italic">La papelera está vacía</p>';
+                else items.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between p-3 bg-gray-50 dark:bg-crDarkGrey rounded-xl border border-gray-200 dark:border-gray-800';
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <img src="${item.imageUrl}" class="w-10 h-14 object-cover rounded shadow" onerror="this.src='https://via.placeholder.com/100'">
+                            <p class="font-bold text-xs text-black dark:text-white">${item.title}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="restoreFromTrash(${item.id})" class="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors"><i class="fas fa-undo"></i></button>
+                            <button onclick="permanentDelete(${item.id})" class="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><i class="fas fa-times-circle"></i></button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
             };
         }
 
         function restoreFromTrash(id) {
             const tx = db.transaction([STORE_NAME, TRASH_STORE], 'readwrite');
-            const seriesStore = tx.objectStore(STORE_NAME);
             const trashStore = tx.objectStore(TRASH_STORE);
-
+            const seriesStore = tx.objectStore(STORE_NAME);
             trashStore.get(id).onsuccess = (e) => {
                 const item = e.target.result;
-                if(item) {
-                    seriesStore.add(item);
-                    trashStore.delete(id);
-                }
+                if(item) { seriesStore.add(item); trashStore.delete(id); }
             };
-
-            tx.oncomplete = () => {
-                renderTrashList();
-                loadSeries();
-                updateTrashBadge();
-            };
+            tx.oncomplete = () => { renderTrashList(); loadSeries(); updateTrashBadge(); };
         }
 
         function permanentDelete(id) {
-            if (!confirm('Esta acción no se puede deshacer. ¿Eliminar permanentemente esta serie?')) return;
+            if (!confirm('¿Eliminar permanentemente?')) return;
             const tx = db.transaction([TRASH_STORE], 'readwrite');
-            const store = tx.objectStore(TRASH_STORE);
-            store.delete(id);
-            tx.oncomplete = () => {
-                renderTrashList();
-                updateTrashBadge();
-            };
+            tx.objectStore(TRASH_STORE).delete(id);
+            tx.oncomplete = () => { renderTrashList(); updateTrashBadge(); };
         }
 
         function emptyTrash() {
-            if (!confirm('¿Vaciar toda la papelera permanentemente? Todas las series se perderán para siempre.')) return;
+            if (!confirm('¿Vaciar papelera?')) return;
             const tx = db.transaction([TRASH_STORE], 'readwrite');
-            const store = tx.objectStore(TRASH_STORE);
-            store.clear();
-            tx.oncomplete = () => {
-                renderTrashList();
-                updateTrashBadge();
-            };
+            tx.objectStore(TRASH_STORE).clear();
+            tx.oncomplete = () => { renderTrashList(); updateTrashBadge(); };
         }
 
         function updateTrashBadge() {
@@ -575,16 +549,12 @@
 
         function closeTrashModal() { document.getElementById('trashModal').classList.add('hidden'); }
 
-        // --- ESTADÍSTICAS ---
-
         function updateStats(all) {
             document.getElementById('statTotal').innerText = all.length;
             document.getElementById('statVisto').innerText = all.filter(s => s.status === 'visto').length;
             document.getElementById('statEps').innerText = all.reduce((acc, curr) => acc + (curr.episodes || 0), 0);
             document.getElementById('statAvg').innerText = all.length > 0 ? (all.reduce((acc, curr) => acc + curr.rating, 0) / all.length).toFixed(1) : "0.0";
         }
-
-        // --- IMPORT/EXPORT ---
 
         function getFormattedDate() {
             const now = new Date();
@@ -614,20 +584,12 @@
                     const data = JSON.parse(e.target.result);
                     const tx = db.transaction([STORE_NAME], 'readwrite');
                     const store = tx.objectStore(STORE_NAME);
-                    data.forEach(item => { 
-                        const newItem = {...item};
-                        delete newItem.id; 
-                        store.add(newItem); 
-                    });
+                    data.forEach(item => { const ni = {...item}; delete ni.id; store.add(ni); });
                     tx.oncomplete = () => loadSeries();
-                } catch(err) {
-                    alert("Archivo JSON no válido");
-                }
+                } catch(err) { alert("Archivo JSON no válido"); }
             };
             reader.readAsText(input.files[0]);
         }
-
-        setupStarRating(5);
     </script>
 </body>
 </html>
