@@ -15,6 +15,15 @@
                         crOrange: '#f47521',
                         crBlack: '#23252b',
                         crDarkGrey: '#141519',
+                    },
+                    animation: {
+                        'fadeIn': 'fadeIn 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        }
                     }
                 }
             }
@@ -44,6 +53,7 @@
             from { opacity: 0; transform: translateX(-10px); }
             to { opacity: 1; transform: translateX(0); }
         }
+        .banner-gradient { background: linear-gradient(90deg, rgba(20,21,25,1) 0%, rgba(20,21,25,0.8) 50%, rgba(20,21,25,0) 100%); }
     </style>
 </head>
 <body class="dark bg-crDarkGrey text-white min-h-screen flex flex-col font-sans">
@@ -66,7 +76,7 @@
 
             <div class="flex items-center gap-2">
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"><i id="themeIcon" class="fas fa-moon"></i></button>
-                <button onclick="openDebugModal()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"><i class="fas fa-database"></i></button>
+                <button onclick="openDebugModal()" title="Gestionar Base de Datos" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"><i class="fas fa-database"></i></button>
                 <button onclick="openModal()" class="bg-crOrange text-white px-4 py-2 rounded font-bold uppercase text-xs hover:brightness-110 transition-all flex items-center gap-2">
                     <i class="fas fa-plus"></i> <span class="hidden sm:inline">Añadir</span>
                 </button>
@@ -75,6 +85,25 @@
     </header>
 
     <main class="container mx-auto px-4 mt-6 flex-grow">
+        
+        <!-- Banner "Viendo Actualmente" -->
+        <section id="watchingBanner" class="hidden mb-8 overflow-hidden rounded-2xl relative bg-gray-900 h-48 md:h-64 shadow-2xl group">
+            <div id="bannerItems" class="h-full flex transition-transform duration-700 ease-in-out">
+                <!-- Los items del banner se inyectan aquí -->
+            </div>
+            <div class="absolute inset-0 banner-gradient pointer-events-none"></div>
+            <div id="bannerContent" class="absolute inset-0 p-6 md:p-10 flex flex-col justify-center pointer-events-none">
+                <span class="text-crOrange font-black uppercase tracking-[0.3em] text-[10px] mb-2 drop-shadow-md">Viendo Actualmente</span>
+                <h2 id="bannerTitle" class="text-2xl md:text-4xl font-black italic uppercase leading-tight max-w-lg mb-2"></h2>
+                <div id="bannerProgress" class="flex items-center gap-4 text-sm font-bold opacity-90"></div>
+            </div>
+            <!-- Controles del banner -->
+            <div class="absolute bottom-4 right-6 flex gap-2">
+                <button onclick="prevBanner()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-crOrange transition-all flex items-center justify-center backdrop-blur-sm"><i class="fas fa-chevron-left text-xs"></i></button>
+                <button onclick="nextBanner()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-crOrange transition-all flex items-center justify-center backdrop-blur-sm"><i class="fas fa-chevron-right text-xs"></i></button>
+            </div>
+        </section>
+
         <!-- Panel de Estadísticas -->
         <section id="statsPanel" class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-100 dark:bg-crBlack p-4 rounded-xl border border-gray-200 dark:border-gray-800 text-black dark:text-white shadow-sm">
             <div class="text-center border-r border-gray-200 dark:border-gray-800">
@@ -178,12 +207,24 @@
         </div>
     </div>
 
-    <!-- Modal Debug para Inspección de Datos -->
+    <!-- Modal Debug para Inspección y Backups -->
     <div id="debugModal" class="fixed inset-0 modal-bg z-[120] hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-crBlack w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-                <h2 class="text-xl font-black uppercase text-black dark:text-white">Explorador de Base de Datos</h2>
-                <button onclick="document.getElementById('debugModal').classList.add('hidden')" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
+            <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-crBlack">
+                <div>
+                    <h2 class="text-xl font-black uppercase text-black dark:text-white">Explorador de Base de Datos</h2>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase">Administra tus datos y haz copias de seguridad</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="exportData()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-[10px] font-black uppercase flex items-center gap-2">
+                        <i class="fas fa-download"></i> Exportar JSON
+                    </button>
+                    <label class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-[10px] font-black uppercase flex items-center gap-2 cursor-pointer">
+                        <i class="fas fa-upload"></i> Importar JSON
+                        <input type="file" id="importInput" class="hidden" accept=".json" onchange="importData(this)">
+                    </label>
+                    <button onclick="document.getElementById('debugModal').classList.add('hidden')" class="text-gray-400 hover:text-crOrange ml-4"><i class="fas fa-times text-xl"></i></button>
+                </div>
             </div>
             <div class="p-6 overflow-x-auto max-h-[70vh] no-scrollbar">
                 <table class="w-full text-left text-xs text-black dark:text-white">
@@ -198,9 +239,11 @@
         const DB_NAME = 'DTrackerProDB';
         const DB_VERSION = 7; 
         const STORE_NAME = 'series';
-        const apiKey = ""; // La API key se inyecta automáticamente en el entorno
+        const apiKey = ""; 
         let db;
         let currentFilterStatus = 'all';
+        let watchingAnimes = [];
+        let bannerIndex = 0;
 
         // Tema
         function toggleTheme() {
@@ -271,6 +314,107 @@
             text.innerText = Math.round(progress) + '%';
         }
 
+        // Gestión del Banner "Viendo Ahora"
+        function updateBanner(all) {
+            watchingAnimes = all.filter(s => s.status === 'en-progreso');
+            const banner = document.getElementById('watchingBanner');
+            const bannerItems = document.getElementById('bannerItems');
+            
+            if (watchingAnimes.length === 0) {
+                banner.classList.add('hidden');
+                return;
+            }
+
+            banner.classList.remove('hidden');
+            bannerItems.innerHTML = '';
+            
+            watchingAnimes.forEach(anime => {
+                const div = document.createElement('div');
+                div.className = 'w-full h-full flex-shrink-0 relative overflow-hidden';
+                div.innerHTML = `<img src="${anime.imageUrl}" class="w-full h-full object-cover blur-sm scale-110 opacity-40" alt="">`;
+                bannerItems.appendChild(div);
+            });
+
+            renderBannerContent();
+        }
+
+        function renderBannerContent() {
+            if (watchingAnimes.length === 0) return;
+            const anime = watchingAnimes[bannerIndex];
+            const bannerItems = document.getElementById('bannerItems');
+            bannerItems.style.transform = `translateX(-${bannerIndex * 100}%)`;
+            
+            document.getElementById('bannerTitle').innerText = anime.title;
+            
+            const totalSeen = anime.seasons ? anime.seasons.reduce((acc, s) => acc + s.seen, 0) : 0;
+            const totalEps = anime.seasons ? anime.seasons.reduce((acc, s) => acc + s.total, 0) : 0;
+            
+            document.getElementById('bannerProgress').innerHTML = `
+                <div class="flex items-center gap-1"><i class="fas fa-list-ol text-crOrange"></i> ${totalSeen} / ${totalEps} EPISODIOS</div>
+                <div class="flex items-center gap-1"><i class="fas fa-layer-group text-crOrange"></i> ${anime.seasons ? anime.seasons.length : 0} TEMPORADAS</div>
+            `;
+
+            // Auto slide
+            clearTimeout(window.bannerTimer);
+            window.bannerTimer = setTimeout(nextBanner, 8000);
+        }
+
+        function nextBanner() {
+            bannerIndex = (bannerIndex + 1) % watchingAnimes.length;
+            renderBannerContent();
+        }
+
+        function prevBanner() {
+            bannerIndex = (bannerIndex - 1 + watchingAnimes.length) % watchingAnimes.length;
+            renderBannerContent();
+        }
+
+        // Importación / Exportación
+        function exportData() {
+            const tx = db.transaction([STORE_NAME], 'readonly');
+            tx.objectStore(STORE_NAME).getAll().onsuccess = (e) => {
+                const data = JSON.stringify(e.target.result, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `DTracker_Backup_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+            };
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!Array.isArray(data)) throw new Error('Formato no válido');
+                    
+                    const tx = db.transaction([STORE_NAME], 'readwrite');
+                    const store = tx.objectStore(STORE_NAME);
+                    
+                    data.forEach(item => {
+                        // Limpiamos el ID para evitar conflictos de auto-incremento o forzamos el nuevo
+                        delete item.id; 
+                        store.add(item);
+                    });
+
+                    tx.oncomplete = () => {
+                        alert('¡Importación completada con éxito!');
+                        loadSeries();
+                        input.value = '';
+                    };
+                } catch (err) {
+                    alert('Error al importar: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Lógica del Grid y Modal (Continuación del código original)
         function openModal(id = null) {
             document.getElementById('seriesForm').reset();
             document.getElementById('seasonsContainer').innerHTML = '';
@@ -361,13 +505,13 @@
                 const search = document.getElementById('searchInput').value.toLowerCase();
                 
                 updateStats(series);
+                updateBanner(series);
 
                 if (currentFilterStatus === 'fav') series = series.filter(s => s.isFavorite);
                 else if (currentFilterStatus !== 'all') series = series.filter(s => s.status === currentFilterStatus);
                 
                 if (search) series = series.filter(s => s.title.toLowerCase().includes(search));
 
-                // Ordenar por actualización más reciente
                 series.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
                 renderGrid(series);
             };
@@ -424,8 +568,6 @@
             document.getElementById('statProgreso').innerText = all.filter(s => s.status === 'en-progreso').length;
         }
 
-        // --- FUNCIONALIDADES API E IA ---
-
         async function generateDescriptionWithIA() {
             const title = document.getElementById('title').value;
             const iaBtn = document.getElementById('iaBtn');
@@ -473,7 +615,6 @@
                     if(!document.getElementById('notes').value) {
                         document.getElementById('notes').value = anime.synopsis || '';
                     }
-                    // Si el estado es pendiente y tiene episodios conocidos, podríamos pre-rellenar
                     if (anime.episodes && document.querySelectorAll('.season-row').length === 1) {
                         const firstRow = document.querySelector('.season-row');
                         const totalInput = firstRow.querySelector('.season-total');
@@ -504,7 +645,7 @@
                 tx.objectStore(STORE_NAME).delete(id);
                 tx.oncomplete = () => {
                     loadSeries();
-                    openDebugModal(); // Refresh table if open
+                    openDebugModal(); 
                 };
             }
         }
