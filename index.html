@@ -220,22 +220,22 @@
     <!-- Modal Papelera -->
     <div id="trashModal" class="fixed inset-0 modal-bg z-[110] hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-crBlack w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-                <h2 class="text-xl font-black uppercase italic"><i class="fas fa-trash-alt mr-2 text-crOrange"></i> Papelera</h2>
-                <button onclick="closeTrashModal()" class="text-gray-400 hover:text-crOrange"><i class="fas fa-times"></i></button>
+            <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-crBlack">
+                <h2 class="text-xl font-black uppercase italic text-black dark:text-white"><i class="fas fa-trash-alt mr-2 text-crOrange"></i> Papelera</h2>
+                <button onclick="closeTrashModal()" class="text-gray-400 hover:text-crOrange transition-colors"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div id="trashList" class="p-6 max-h-[60vh] overflow-y-auto space-y-3 no-scrollbar">
+            <div id="trashList" class="p-6 max-h-[60vh] overflow-y-auto space-y-3 no-scrollbar bg-white dark:bg-crBlack">
                 <!-- Se llena dinámicamente -->
             </div>
             <div class="p-4 bg-gray-50 dark:bg-crDarkGrey border-t border-gray-200 dark:border-gray-800 flex justify-end gap-2">
-                <button onclick="emptyTrash()" class="text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 hover:bg-red-500/10 rounded">Vaciar permanentemente</button>
+                <button onclick="emptyTrash()" class="text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 hover:bg-red-500/10 rounded transition-colors">Vaciar permanentemente</button>
             </div>
         </div>
     </div>
 
     <script>
         const DB_NAME = 'DTrackerProDB';
-        const DB_VERSION = 4; // Subimos versión para el nuevo almacén de papelera
+        const DB_VERSION = 4;
         const STORE_NAME = 'series';
         const TRASH_STORE = 'trash';
         let db;
@@ -280,7 +280,8 @@
         }
 
         async function autoFetchAnime() {
-            const title = document.getElementById('title').value;
+            const titleInput = document.getElementById('title');
+            const title = titleInput.value;
             if (!title) return;
             const magicBtn = document.getElementById('magicBtn');
             magicBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -305,15 +306,17 @@
             if (id) {
                 db.transaction([STORE_NAME]).objectStore(STORE_NAME).get(Number(id)).onsuccess = (e) => {
                     const data = e.target.result;
-                    document.getElementById('editingId').value = data.id;
-                    document.getElementById('title').value = data.title;
-                    document.getElementById('status').value = data.status;
-                    document.getElementById('imageUrl').value = data.imageUrl;
-                    document.getElementById('episodes').value = data.episodes || 0;
-                    document.getElementById('notes').value = data.notes || '';
-                    document.getElementById('crUrl').value = data.crUrl || '';
-                    setupStarRating(data.rating || 5);
-                    document.getElementById('modalTitle').innerText = "Editar Serie";
+                    if(data) {
+                        document.getElementById('editingId').value = data.id;
+                        document.getElementById('title').value = data.title;
+                        document.getElementById('status').value = data.status;
+                        document.getElementById('imageUrl').value = data.imageUrl;
+                        document.getElementById('episodes').value = data.episodes || 0;
+                        document.getElementById('notes').value = data.notes || '';
+                        document.getElementById('crUrl').value = data.crUrl || '';
+                        setupStarRating(data.rating || 5);
+                        document.getElementById('modalTitle').innerText = "Editar Serie";
+                    }
                 };
             }
             document.getElementById('modal').classList.remove('hidden');
@@ -352,6 +355,7 @@
         }
 
         function loadSeries() {
+            if(!db) return;
             db.transaction([STORE_NAME]).objectStore(STORE_NAME).getAll().onsuccess = (e) => {
                 let series = e.target.result;
                 const search = document.getElementById('searchInput').value.toLowerCase();
@@ -477,6 +481,11 @@
         }
 
         function openTrashModal() {
+            renderTrashList();
+            document.getElementById('trashModal').classList.remove('hidden');
+        }
+
+        function renderTrashList() {
             const list = document.getElementById('trashList');
             list.innerHTML = '<p class="text-center text-gray-500 py-10 italic">Cargando papelera...</p>';
             
@@ -494,7 +503,7 @@
                                 <img src="${item.imageUrl}" class="w-10 h-14 object-cover rounded shadow" onerror="this.src='https://via.placeholder.com/100'">
                                 <div>
                                     <p class="font-bold text-xs text-black dark:text-white">${item.title}</p>
-                                    <p class="text-[9px] text-gray-500 uppercase">Eliminada</p>
+                                    <p class="text-[9px] text-gray-500 uppercase tracking-tighter">Eliminada recientemente</p>
                                 </div>
                             </div>
                             <div class="flex gap-2">
@@ -510,44 +519,52 @@
                     });
                 }
             };
-            document.getElementById('trashModal').classList.remove('hidden');
         }
 
         function restoreFromTrash(id) {
             const tx = db.transaction([STORE_NAME, TRASH_STORE], 'readwrite');
-            tx.objectStore(TRASH_STORE).get(id).onsuccess = (e) => {
+            const seriesStore = tx.objectStore(STORE_NAME);
+            const trashStore = tx.objectStore(TRASH_STORE);
+
+            trashStore.get(id).onsuccess = (e) => {
                 const item = e.target.result;
-                tx.objectStore(STORE_NAME).add(item);
-                tx.objectStore(TRASH_STORE).delete(id);
+                if(item) {
+                    seriesStore.add(item);
+                    trashStore.delete(id);
+                }
             };
+
             tx.oncomplete = () => {
-                openTrashModal();
+                renderTrashList();
                 loadSeries();
                 updateTrashBadge();
             };
         }
 
         function permanentDelete(id) {
-            if (!confirm('Esta acción no se puede deshacer. ¿Eliminar permanentemente?')) return;
+            if (!confirm('Esta acción no se puede deshacer. ¿Eliminar permanentemente esta serie?')) return;
             const tx = db.transaction([TRASH_STORE], 'readwrite');
-            tx.objectStore(TRASH_STORE).delete(id);
+            const store = tx.objectStore(TRASH_STORE);
+            store.delete(id);
             tx.oncomplete = () => {
-                openTrashModal();
+                renderTrashList();
                 updateTrashBadge();
             };
         }
 
         function emptyTrash() {
-            if (!confirm('¿Vaciar toda la papelera permanentemente?')) return;
+            if (!confirm('¿Vaciar toda la papelera permanentemente? Todas las series se perderán para siempre.')) return;
             const tx = db.transaction([TRASH_STORE], 'readwrite');
-            tx.objectStore(TRASH_STORE).clear();
+            const store = tx.objectStore(TRASH_STORE);
+            store.clear();
             tx.oncomplete = () => {
-                openTrashModal();
+                renderTrashList();
                 updateTrashBadge();
             };
         }
 
         function updateTrashBadge() {
+            if(!db) return;
             db.transaction([TRASH_STORE]).objectStore(TRASH_STORE).count().onsuccess = (e) => {
                 const count = e.target.result;
                 const badge = document.getElementById('trashCount');
@@ -569,24 +586,43 @@
 
         // --- IMPORT/EXPORT ---
 
+        function getFormattedDate() {
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yyyy = now.getFullYear();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            return `${dd}-${mm}-${yyyy}_${hh}-${min}`;
+        }
+
         function exportData() {
             db.transaction([STORE_NAME], 'readonly').objectStore(STORE_NAME).getAll().onsuccess = (e) => {
                 const blob = new Blob([JSON.stringify(e.target.result, null, 2)], { type: 'application/json' });
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = `d-tracker-backup_${new Date().getTime()}.json`;
+                a.download = `d-tracker-backup_${getFormattedDate()}.json`;
                 a.click();
             };
         }
 
         function importData(input) {
+            if(!input.files.length) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                const data = JSON.parse(e.target.result);
-                const tx = db.transaction([STORE_NAME], 'readwrite');
-                const store = tx.objectStore(STORE_NAME);
-                data.forEach(item => { delete item.id; store.add(item); });
-                tx.oncomplete = () => loadSeries();
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const tx = db.transaction([STORE_NAME], 'readwrite');
+                    const store = tx.objectStore(STORE_NAME);
+                    data.forEach(item => { 
+                        const newItem = {...item};
+                        delete newItem.id; 
+                        store.add(newItem); 
+                    });
+                    tx.oncomplete = () => loadSeries();
+                } catch(err) {
+                    alert("Archivo JSON no válido");
+                }
             };
             reader.readAsText(input.files[0]);
         }
