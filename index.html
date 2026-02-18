@@ -75,18 +75,13 @@
             color: #4b5563;
         }
 
-        .filter-active {
-            color: white !important;
-            border-color: var(--cr-orange) !important;
-        }
-
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--cr-dark-grey); }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--cr-orange); }
     </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="min-h-screen flex flex-col">
 
     <!-- Header -->
     <header class="bg-[#23252b] border-b border-gray-800 sticky top-0 z-50">
@@ -101,7 +96,7 @@
         </div>
     </header>
 
-    <main class="container mx-auto px-4 mt-8">
+    <main class="container mx-auto px-4 mt-8 flex-grow">
         <!-- Filtros de Estado -->
         <div class="flex flex-wrap gap-4 mb-4 overflow-x-auto pb-2 no-scrollbar border-b border-gray-800">
             <button onclick="setFilterStatus('all')" id="status-all" class="filter-btn-status text-white font-bold border-b-2 border-[#f47521] px-2 py-1 transition-all">Todos</button>
@@ -109,7 +104,7 @@
             <button onclick="setFilterStatus('pendiente')" id="status-pendiente" class="filter-btn-status text-gray-400 hover:text-white font-bold border-b-2 border-transparent px-2 py-1 transition-all">Por Ver</button>
         </div>
 
-        <!-- Filtros de Evaluación (Estrellas) -->
+        <!-- Filtros de Evaluación -->
         <div class="flex flex-wrap items-center gap-4 mb-8 overflow-x-auto pb-2 no-scrollbar">
             <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Filtrar por Nota:</span>
             <button onclick="setFilterRating('all')" id="rating-all" class="filter-btn-rating text-white bg-gray-800 px-3 py-1 rounded-full text-xs font-bold border border-[#f47521]">Cualquiera</button>
@@ -130,9 +125,27 @@
         <!-- Estado Vacío -->
         <div id="emptyState" class="hidden text-center py-20">
             <i class="fas fa-box-open text-6xl text-gray-700 mb-4"></i>
-            <p class="text-xl text-gray-500 font-medium">No hay series que coincidan con los filtros.</p>
+            <p class="text-xl text-gray-500 font-medium">No hay series que coincidan.</p>
         </div>
     </main>
+
+    <!-- Footer con Opciones de Importación/Exportación -->
+    <footer class="bg-[#1a1c22] border-t border-gray-800 py-6 mt-12">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-gray-500 text-xs font-bold uppercase tracking-widest">
+                Gestión de Datos Local
+            </div>
+            <div class="flex gap-4">
+                <button onclick="exportData()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all">
+                    <i class="fas fa-download text-[#f47521]"></i> Exportar Backup
+                </button>
+                <label class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-all">
+                    <i class="fas fa-upload text-[#f47521]"></i> Importar Backup
+                    <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(this)">
+                </label>
+            </div>
+        </div>
+    </footer>
 
     <!-- Modal Formulario -->
     <div id="modal" class="fixed inset-0 modal-bg z-[100] hidden flex items-center justify-center p-4">
@@ -193,7 +206,6 @@
         const STORE_NAME = 'series';
         let db;
         
-        // Estado de los filtros globales
         let currentFilterStatus = 'all';
         let currentFilterRating = 'all';
 
@@ -239,7 +251,7 @@
             });
         }
 
-        // Búsqueda de imagen
+        // Búsqueda de imagen (API Jikan)
         async function autoFetchAnime() {
             const titleInput = document.getElementById('title');
             const urlInput = document.getElementById('imageUrl');
@@ -249,7 +261,7 @@
             if (!titleInput.value.trim()) return;
 
             try {
-                statusText.classList.remove('hidden');
+                statusText.classList.remove('hidden', 'text-green-500', 'text-red-500');
                 statusText.innerText = "Buscando imagen...";
                 magicBtn.disabled = true;
 
@@ -267,16 +279,66 @@
                 }
             } catch (err) {
                 statusText.innerText = "Error de conexión.";
+                statusText.classList.add('text-red-500');
             } finally {
                 magicBtn.disabled = false;
-                setTimeout(() => {
-                    statusText.classList.add('hidden');
-                    statusText.classList.remove('text-green-500', 'text-red-500');
-                }, 3000);
+                setTimeout(() => statusText.classList.add('hidden'), 3000);
             }
         }
 
-        // Modal Handlers
+        // Exportar datos
+        function exportData() {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                const data = JSON.stringify(request.result, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `d-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+        }
+
+        // Importar datos
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const seriesArray = JSON.parse(e.target.result);
+                    if (!Array.isArray(seriesArray)) throw new Error('Formato inválido');
+
+                    if (!confirm(`Se importarán ${seriesArray.length} series. ¿Deseas continuar?`)) return;
+
+                    const transaction = db.transaction([STORE_NAME], 'readwrite');
+                    const store = transaction.objectStore(STORE_NAME);
+
+                    seriesArray.forEach(item => {
+                        // Limpiamos el ID para que IndexedDB asigne nuevos o actualice
+                        delete item.id; 
+                        store.add(item);
+                    });
+
+                    transaction.oncomplete = () => {
+                        alert('¡Importación completada con éxito!');
+                        loadSeries();
+                    };
+                } catch (err) {
+                    alert('Error al importar el archivo. Asegúrate de que sea un JSON válido de D Tracker.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // CRUD y Filtros
         function openModal(editId = null) {
             const modal = document.getElementById('modal');
             const form = document.getElementById('seriesForm');
@@ -312,34 +374,26 @@
             document.getElementById('modal').classList.add('hidden');
         }
 
-        // Lógica de Filtros
         function setFilterStatus(status) {
             currentFilterStatus = status;
-            // Actualizar UI
             document.querySelectorAll('.filter-btn-status').forEach(btn => {
                 btn.classList.remove('text-white', 'border-[#f47521]');
                 btn.classList.add('text-gray-400', 'border-transparent');
             });
             document.getElementById(`status-${status}`).classList.add('text-white', 'border-[#f47521]');
-            document.getElementById(`status-${status}`).classList.remove('text-gray-400', 'border-transparent');
-            
             loadSeries();
         }
 
         function setFilterRating(rating) {
             currentFilterRating = rating;
-            // Actualizar UI
             document.querySelectorAll('.filter-btn-rating').forEach(btn => {
                 btn.classList.remove('text-white', 'border-[#f47521]');
                 btn.classList.add('text-gray-400', 'border-transparent');
             });
             document.getElementById(`rating-${rating}`).classList.add('text-white', 'border-[#f47521]');
-            document.getElementById(`rating-${rating}`).classList.remove('text-gray-400', 'border-transparent');
-            
             loadSeries();
         }
 
-        // CRUD
         document.getElementById('seriesForm').onsubmit = (e) => {
             e.preventDefault();
             const editingId = document.getElementById('editingId').value;
@@ -375,17 +429,8 @@
 
             request.onsuccess = () => {
                 let series = request.result;
-                
-                // Aplicar Filtro de Estado
-                if (currentFilterStatus !== 'all') {
-                    series = series.filter(s => s.status === currentFilterStatus);
-                }
-                
-                // Aplicar Filtro de Calificación
-                if (currentFilterRating !== 'all') {
-                    series = series.filter(s => s.rating === currentFilterRating);
-                }
-
+                if (currentFilterStatus !== 'all') series = series.filter(s => s.status === currentFilterStatus);
+                if (currentFilterRating !== 'all') series = series.filter(s => s.rating === currentFilterRating);
                 renderGrid(series);
             };
         }
@@ -431,23 +476,19 @@
                     <button onclick="event.stopPropagation(); deleteSeries(${item.id})" class="absolute top-2 right-2 bg-black/80 w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white hover:text-red-500 shadow-lg">
                         <i class="fas fa-trash-alt text-xs"></i>
                     </button>
-                    <div class="absolute top-2 left-2 bg-[#f47521] px-2 py-0.5 rounded text-[9px] font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                        Editar
-                    </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
         function deleteSeries(id) {
-            if(!confirm('¿Eliminar esta serie de D Tracker?')) return;
+            if(!confirm('¿Eliminar esta serie?')) return;
             const transaction = db.transaction([STORE_NAME], 'readwrite');
             const store = transaction.objectStore(STORE_NAME);
             store.delete(id);
             transaction.oncomplete = () => loadSeries();
         }
 
-        // Inicializar UI de estrellas al cargar
         setupStarRating(5);
     </script>
 </body>
