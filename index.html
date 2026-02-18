@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D Tracker Pro | Mi Bitácora</title>
+    <title>D Tracker Pro | Seguimiento Avanzado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -31,25 +31,7 @@
         .poster-container { aspect-ratio: 2 / 3; overflow: hidden; position: relative; }
         .poster-image { width: 100%; height: 100%; object-fit: cover; }
         .modal-bg { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
-        
-        .cr-badge {
-            background: linear-gradient(90deg, #f47521, #cb5a0b);
-            box-shadow: 0 2px 10px rgba(244, 117, 33, 0.4);
-        }
-
-        @keyframes slideUp {
-            from { transform: translate(-50%, 100%); opacity: 0; }
-            to { transform: translate(-50%, 0); opacity: 1; }
-        }
-        .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
-
-        .luffy-logo {
-            filter: drop-shadow(0 0 2px rgba(244, 117, 33, 0.5));
-            transition: transform 0.3s ease;
-        }
-        .luffy-logo:hover { transform: scale(1.1) rotate(5deg); }
-        
-        /* Corazón latente */
+        .heart-active { color: #ef4444 !important; animation: heartBeat 0.8s ease-in-out; }
         @keyframes heartBeat {
             0% { transform: scale(1); }
             14% { transform: scale(1.3); }
@@ -57,7 +39,11 @@
             42% { transform: scale(1.3); }
             70% { transform: scale(1); }
         }
-        .heart-active { color: #ef4444 !important; animation: heartBeat 0.8s ease-in-out; }
+        .season-row { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
     </style>
 </head>
 <body class="dark bg-crDarkGrey text-white min-h-screen flex flex-col font-sans">
@@ -66,39 +52,23 @@
     <header class="bg-white dark:bg-crBlack border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
         <div class="container mx-auto px-4 h-20 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <div class="luffy-logo w-12 h-12 flex items-center justify-center">
-                    <svg viewBox="0 0 100 100" class="w-full h-full">
-                        <path d="M10,60 Q10,35 50,35 Q90,35 90,60" fill="#f4d03f" stroke="#000" stroke-width="2"/>
-                        <rect x="25" y="52" width="50" height="8" fill="#e74c3c" stroke="#000" stroke-width="1"/>
-                        <path d="M25,60 Q25,85 50,85 Q75,85 75,60" fill="#fdebd0" stroke="#000" stroke-width="2"/>
-                        <circle cx="40" cy="65" r="3" fill="#000"/>
-                        <circle cx="60" cy="65" r="3" fill="#000"/>
-                        <path d="M35,72 L45,72 M40,70 L40,74" stroke="#000" stroke-width="1"/>
-                        <path d="M35,75 Q50,82 65,75" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
+                <div class="w-10 h-10 bg-crOrange rounded-lg flex items-center justify-center shadow-lg">
+                    <i class="fas fa-play text-white"></i>
                 </div>
-                <h1 class="text-2xl font-black tracking-tighter uppercase italic text-black dark:text-white">D <span class="text-crOrange">Tracker</span></h1>
+                <h1 class="text-xl font-black tracking-tighter uppercase italic text-black dark:text-white">D <span class="text-crOrange">Tracker</span></h1>
             </div>
 
             <div class="flex-1 max-w-md relative">
-                <input type="text" id="searchInput" oninput="loadSeries()" placeholder="Buscar en mi colección..." 
+                <input type="text" id="searchInput" oninput="loadSeries()" placeholder="Buscar anime..." 
                     class="w-full bg-gray-100 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded-full py-2 px-10 outline-none focus:border-crOrange text-black dark:text-white">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
             </div>
 
-            <div class="flex items-center gap-3">
-                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400">
-                    <i id="themeIcon" class="fas fa-moon"></i>
-                </button>
-                <button onclick="openDebugModal()" title="Ver base de datos" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-database"></i>
-                </button>
-                <button onclick="openTrashModal()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 relative">
-                    <i class="fas fa-trash-alt"></i>
-                    <span id="trashCount" class="absolute -top-1 -right-1 bg-crOrange text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
-                </button>
-                <button onclick="openModal()" class="bg-crOrange text-white px-4 py-2 rounded font-bold uppercase text-xs flex items-center gap-2 hover:brightness-110 transition-all">
-                    <i class="fas fa-plus"></i> <span class="hidden sm:inline">Nueva Serie</span>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"><i id="themeIcon" class="fas fa-moon"></i></button>
+                <button onclick="openDebugModal()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"><i class="fas fa-database"></i></button>
+                <button onclick="openModal()" class="bg-crOrange text-white px-4 py-2 rounded font-bold uppercase text-xs hover:brightness-110 transition-all flex items-center gap-2">
+                    <i class="fas fa-plus"></i> <span class="hidden sm:inline">Añadir</span>
                 </button>
             </div>
         </div>
@@ -106,13 +76,13 @@
 
     <main class="container mx-auto px-4 mt-6 flex-grow">
         <!-- Panel de Estadísticas -->
-        <section id="statsPanel" class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-100 dark:bg-crBlack p-4 rounded-xl border border-gray-200 dark:border-gray-800 text-black dark:text-white">
+        <section id="statsPanel" class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-100 dark:bg-crBlack p-4 rounded-xl border border-gray-200 dark:border-gray-800 text-black dark:text-white shadow-sm">
             <div class="text-center border-r border-gray-200 dark:border-gray-800">
                 <p class="text-[10px] uppercase font-bold text-gray-500">Total</p>
                 <p id="statTotal" class="text-2xl font-black text-crOrange">0</p>
             </div>
             <div class="text-center border-r border-gray-200 dark:border-gray-800">
-                <p class="text-[10px] uppercase font-bold text-gray-500">Vistos</p>
+                <p class="text-[10px] uppercase font-bold text-gray-500">Completados</p>
                 <p id="statVisto" class="text-2xl font-black text-green-500">0</p>
             </div>
             <div class="text-center border-r border-gray-200 dark:border-gray-800">
@@ -120,76 +90,31 @@
                 <p id="statFav" class="text-2xl font-black text-red-500">0</p>
             </div>
             <div class="text-center">
-                <p class="text-[10px] uppercase font-bold text-gray-500">Episodios</p>
-                <p id="statEps" class="text-2xl font-black text-blue-500">0</p>
+                <p class="text-[10px] uppercase font-bold text-gray-500">En Progreso</p>
+                <p id="statProgreso" class="text-2xl font-black text-blue-500">0</p>
             </div>
         </section>
 
-        <!-- Filtros -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-            <div class="flex flex-wrap gap-2 items-center">
-                <button onclick="setFilterStatus('all')" id="status-all" class="filter-btn-status px-4 py-1.5 rounded-full text-xs font-bold border-2 border-crOrange bg-crOrange text-white">Todos</button>
-                <button onclick="setFilterStatus('fav')" id="status-fav" class="filter-btn-status px-4 py-1.5 rounded-full text-xs font-bold border-2 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400"><i class="fas fa-heart mr-1"></i> Favoritos</button>
-                <button onclick="setFilterStatus('visto')" id="status-visto" class="filter-btn-status px-4 py-1.5 rounded-full text-xs font-bold border-2 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400">Vistos</button>
-                <button onclick="setFilterStatus('pendiente')" id="status-pendiente" class="filter-btn-status px-4 py-1.5 rounded-full text-xs font-bold border-2 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400">Pendientes</button>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Ordenar:</span>
-                <select id="sortSelect" onchange="loadSeries()" class="bg-white dark:bg-crBlack border border-gray-300 dark:border-gray-700 rounded p-1.5 text-xs text-black dark:text-white outline-none">
-                    <option value="recent">Recientes</option>
-                    <option value="alpha">A-Z</option>
-                    <option value="rating">Mejor Nota</option>
-                </select>
-            </div>
+        <!-- Filtros Rápidos -->
+        <div class="flex flex-wrap gap-2 mb-8">
+            <button onclick="setFilterStatus('all')" id="status-all" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold border-2 border-crOrange bg-crOrange text-white transition-all">Todos</button>
+            <button onclick="setFilterStatus('pendiente')" id="status-pendiente" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold border-2 border-gray-300 dark:border-gray-700 text-gray-500 hover:border-crOrange transition-all">Pendientes</button>
+            <button onclick="setFilterStatus('en-progreso')" id="status-en-progreso" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold border-2 border-gray-300 dark:border-gray-700 text-gray-500 hover:border-crOrange transition-all">En Progreso</button>
+            <button onclick="setFilterStatus('visto')" id="status-visto" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold border-2 border-gray-300 dark:border-gray-700 text-gray-500 hover:border-crOrange transition-all">Completados</button>
+            <button onclick="setFilterStatus('fav')" id="status-fav" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold border-2 border-gray-300 dark:border-gray-700 text-gray-500 hover:border-crOrange transition-all"><i class="fas fa-heart mr-1"></i> Favoritos</button>
         </div>
 
-        <!-- Grid -->
-        <div id="seriesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"></div>
-        <div id="emptyState" class="hidden text-center py-20">
-            <i class="fas fa-search text-6xl text-gray-300 dark:text-gray-700 mb-4"></i>
-            <p class="text-xl text-gray-500 font-medium italic">No se encontraron resultados...</p>
-        </div>
+        <div id="seriesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pb-12"></div>
     </main>
 
-    <!-- Notificación Deshacer -->
-    <div id="undoToast" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] hidden">
-        <div class="bg-crBlack border border-gray-700 shadow-2xl rounded-full px-6 py-3 flex items-center gap-4 animate-slide-up">
-            <span class="text-sm font-medium">Serie movida a la papelera</span>
-            <div class="h-4 w-[1px] bg-gray-700"></div>
-            <button onclick="undoDelete()" class="text-crOrange font-black text-xs uppercase tracking-widest hover:text-white transition-colors">
-                <i class="fas fa-undo-alt mr-1"></i> Deshacer
-            </button>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-100 dark:bg-crBlack border-t border-gray-200 dark:border-gray-800 py-8 mt-12">
-        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-            <div class="flex gap-4">
-                <button onclick="exportData()" class="text-gray-600 dark:text-gray-400 hover:text-crOrange text-xs font-bold uppercase flex items-center gap-2 transition-colors">
-                    <i class="fas fa-download"></i> Exportar JSON
-                </button>
-                <label class="text-gray-600 dark:text-gray-400 hover:text-crOrange text-xs font-bold uppercase flex items-center gap-2 cursor-pointer transition-colors">
-                    <i class="fas fa-upload"></i> Importar JSON
-                    <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(this)">
-                </label>
-            </div>
-            <p class="text-gray-400 text-[10px] uppercase tracking-[0.2em]">D Tracker Pro &copy; 2026</p>
-        </div>
-    </footer>
-
-    <!-- Modal Formulario -->
+    <!-- Modal de Formulario -->
     <div id="modal" class="fixed inset-0 modal-bg z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-crBlack w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
+        <div class="bg-white dark:bg-crBlack w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800 animate-fadeIn">
             <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-crBlack">
                 <h2 id="modalTitle" class="text-xl font-black italic uppercase text-black dark:text-white">Detalles de Serie</h2>
                 <div class="flex items-center gap-4">
-                    <button onclick="toggleFavoriteForm()" id="favBtnForm" class="text-2xl text-gray-300 dark:text-gray-700 hover:scale-110 transition-all">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                    <button onclick="closeModal()" class="text-gray-400 hover:text-crOrange transition-colors">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
+                    <button onclick="toggleFavoriteForm()" id="favBtnForm" class="text-2xl text-gray-300 dark:text-gray-700 transition-colors"><i class="fas fa-heart"></i></button>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-crOrange"><i class="fas fa-times text-xl"></i></button>
                 </div>
             </div>
             
@@ -199,98 +124,71 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Título</label>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Título del Anime</label>
                         <div class="flex gap-2">
-                            <input type="text" id="title" required class="flex-1 bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white focus:border-crOrange outline-none">
-                            <button type="button" onclick="autoFetchAnime()" id="magicBtn" title="Autocompletar con IA (Jikan API)" class="bg-gray-200 dark:bg-gray-700 px-3 rounded text-crOrange hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                <i class="fas fa-magic"></i>
-                            </button>
+                            <input type="text" id="title" required class="flex-1 bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white focus:border-crOrange outline-none transition-colors">
+                            <button type="button" onclick="autoFetchAnime()" title="Buscar datos automáticamente" class="bg-gray-200 dark:bg-gray-700 px-3 rounded text-crOrange hover:bg-crOrange hover:text-white transition-all"><i class="fas fa-magic"></i></button>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">URL Crunchyroll</label>
-                        <input type="url" id="crUrl" placeholder="https://www.crunchyroll.com/..." class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white focus:border-crOrange outline-none text-sm">
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Estado Actual</label>
+                        <select id="status" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white outline-none focus:border-crOrange transition-colors">
+                            <option value="pendiente">Pendiente</option>
+                            <option value="en-progreso">En Progreso</option>
+                            <option value="visto">Completado / Visto</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Imagen URL</label>
-                        <input type="url" id="imageUrl" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white focus:border-crOrange outline-none text-sm">
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">URL de Portada</label>
+                        <input type="url" id="imageUrl" placeholder="https://..." class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white focus:border-crOrange outline-none text-sm">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Estado</label>
-                            <select id="status" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white outline-none">
-                                <option value="pendiente">Pendiente</option>
-                                <option value="visto">Visto</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Capítulos</label>
-                            <input type="number" id="episodes" value="0" min="0" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white outline-none">
-                        </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Link de Crunchyroll</label>
+                        <input type="url" id="crUrl" placeholder="https://crunchyroll.com/..." class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-2 text-black dark:text-white focus:border-crOrange outline-none text-sm">
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Calificación Personal</label>
-                    <div id="starRatingContainer" class="flex items-center gap-1.5 mt-1"></div>
-                    <input type="hidden" id="rating" value="5">
+                <!-- Sección de Temporadas -->
+                <div class="bg-gray-50 dark:bg-crDarkGrey p-4 rounded-xl border border-gray-200 dark:border-gray-800">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">Gestión de Temporadas</label>
+                        <button type="button" onclick="addSeasonRow()" class="text-crOrange font-bold text-[10px] uppercase hover:underline"><i class="fas fa-plus mr-1"></i> Nueva Temporada</button>
+                    </div>
+                    <div id="seasonsContainer" class="space-y-3">
+                        <!-- Filas de temporada -->
+                    </div>
                 </div>
 
                 <div>
                     <div class="flex justify-between items-center mb-1">
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">Descripción Automática / Notas</label>
-                        <button type="button" onclick="generateDescriptionWithIA()" id="genDescBtn" class="text-[9px] text-crOrange font-bold uppercase hover:underline">
-                            <i class="fas fa-robot mr-1"></i> Generar con IA
-                        </button>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">Sinopsis y Notas</label>
+                        <button type="button" onclick="generateDescriptionWithIA()" id="iaBtn" class="text-[9px] text-crOrange font-bold uppercase hover:underline"><i class="fas fa-robot mr-1"></i> Generar con IA</button>
                     </div>
-                    <textarea id="notes" rows="4" class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-3 text-black dark:text-white focus:border-crOrange outline-none resize-none text-sm leading-relaxed" placeholder="Aquí aparecerá la sinopsis o tus notas personales..."></textarea>
+                    <textarea id="notes" rows="3" placeholder="Escribe algo sobre este anime..." class="w-full bg-gray-50 dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-3 text-black dark:text-white focus:border-crOrange outline-none resize-none text-sm leading-relaxed"></textarea>
                 </div>
 
                 <div class="pt-4 flex gap-3">
-                    <button type="button" onclick="closeModal()" class="flex-1 py-3 text-gray-500 font-bold uppercase text-xs tracking-widest hover:text-black dark:hover:text-white transition-colors">Cancelar</button>
-                    <button type="submit" id="submitBtn" class="flex-1 bg-crOrange text-white py-3 rounded-lg font-black uppercase text-xs tracking-widest shadow-lg shadow-orange-500/20 hover:brightness-110 transition-all">Guardar Cambios</button>
+                    <button type="button" onclick="closeModal()" class="flex-1 py-3 text-gray-500 font-bold uppercase text-xs tracking-widest hover:text-red-500 transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-crOrange text-white py-3 rounded-lg font-black uppercase text-xs tracking-widest shadow-lg shadow-orange-500/20 hover:brightness-110 transition-all">Guardar Cambios</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Papelera -->
-    <div id="trashModal" class="fixed inset-0 modal-bg z-[110] hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-crBlack w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-crBlack">
-                <h2 class="text-xl font-black uppercase italic text-black dark:text-white"><i class="fas fa-trash-alt mr-2 text-crOrange"></i> Papelera</h2>
-                <button onclick="closeTrashModal()" class="text-gray-400 hover:text-crOrange transition-colors"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div id="trashList" class="p-6 max-h-[60vh] overflow-y-auto space-y-3 no-scrollbar bg-white dark:bg-crBlack"></div>
-            <div class="p-4 bg-gray-50 dark:bg-crDarkGrey border-t border-gray-200 dark:border-gray-800 flex justify-end gap-2">
-                <button onclick="emptyTrash()" class="text-red-500 text-[10px] font-bold uppercase tracking-widest px-4 py-2 hover:bg-red-500/10 rounded transition-colors">Vaciar permanentemente</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Depuración IndexedDB -->
+    <!-- Modal Debug para Inspección de Datos -->
     <div id="debugModal" class="fixed inset-0 modal-bg z-[120] hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-crBlack w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-crBlack">
-                <h2 class="text-xl font-black uppercase text-black dark:text-white"><i class="fas fa-database mr-2 text-blue-500"></i> Explorador IndexedDB</h2>
-                <button onclick="closeDebugModal()" class="text-gray-400 hover:text-crOrange transition-colors"><i class="fas fa-times text-xl"></i></button>
+            <div class="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                <h2 class="text-xl font-black uppercase text-black dark:text-white">Explorador de Base de Datos</h2>
+                <button onclick="document.getElementById('debugModal').classList.add('hidden')" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div class="p-6 overflow-x-auto max-h-[70vh]">
-                <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="text-gray-500 uppercase border-b border-gray-200 dark:border-gray-800">
-                            <th class="py-2 px-4">ID</th>
-                            <th class="py-2 px-4">Título</th>
-                            <th class="py-2 px-4">Estado</th>
-                            <th class="py-2 px-4">Rating</th>
-                            <th class="py-2 px-4">Fav</th>
-                            <th class="py-2 px-4">Creado</th>
-                        </tr>
-                    </thead>
-                    <tbody id="debugTableBody" class="text-black dark:text-white"></tbody>
+            <div class="p-6 overflow-x-auto max-h-[70vh] no-scrollbar">
+                <table class="w-full text-left text-xs text-black dark:text-white">
+                    <thead><tr class="text-gray-500 uppercase border-b border-gray-200 dark:border-gray-800"><th class="py-2 px-4">ID</th><th class="py-2 px-4">Título</th><th class="py-2 px-4">Estado</th><th class="py-2 px-4">Favorito</th><th class="py-2 px-4">Acciones</th></tr></thead>
+                    <tbody id="debugTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -298,15 +196,13 @@
 
     <script>
         const DB_NAME = 'DTrackerProDB';
-        const DB_VERSION = 5; // Versión incrementada para nuevos campos
+        const DB_VERSION = 7; 
         const STORE_NAME = 'series';
-        const TRASH_STORE = 'trash';
-        const apiKey = ""; // La clave se inyecta en ejecución
+        const apiKey = ""; // La API key se inyecta automáticamente en el entorno
         let db;
         let currentFilterStatus = 'all';
-        let undoTimeout;
-        let lastDeletedId = null;
 
+        // Tema
         function toggleTheme() {
             const isDark = document.body.classList.toggle('dark');
             document.body.classList.toggle('light');
@@ -314,14 +210,12 @@
             localStorage.setItem('dtracker-theme', isDark ? 'dark' : 'light');
         }
 
+        // Inicialización de DB
         const request = indexedDB.open(DB_NAME, DB_VERSION);
         request.onupgradeneeded = (e) => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains(STORE_NAME)) {
                 db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-            }
-            if (!db.objectStoreNames.contains(TRASH_STORE)) {
-                db.createObjectStore(TRASH_STORE, { keyPath: 'id' });
             }
         };
 
@@ -329,62 +223,218 @@
             db = e.target.result;
             if(localStorage.getItem('dtracker-theme') === 'light') toggleTheme();
             loadSeries();
-            updateTrashBadge();
         };
 
-        function setupStarRating(val = 5) {
-            const container = document.getElementById('starRatingContainer');
-            container.innerHTML = '';
-            document.getElementById('rating').value = val;
-            for (let i = 1; i <= 5; i++) {
-                const star = document.createElement('i');
-                star.className = `fas fa-star text-lg cursor-pointer transition-colors ${i <= val ? 'text-yellow-500' : 'text-gray-300 dark:text-gray-600'}`;
-                star.onclick = () => setupStarRating(i);
-                container.appendChild(star);
-            }
+        // UI Temporadas
+        function addSeasonRow(seasonNum = '', seen = 0, total = 0) {
+            const container = document.getElementById('seasonsContainer');
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-12 gap-2 items-end season-row bg-white dark:bg-crBlack/50 p-2 rounded border border-gray-200 dark:border-gray-800';
+            
+            const progress = total > 0 ? Math.min(100, (seen / total) * 100) : 0;
+            
+            row.innerHTML = `
+                <div class="col-span-3">
+                    <label class="text-[8px] uppercase font-bold text-gray-500 block mb-1">Nombre/Nº</label>
+                    <input type="text" placeholder="T1" value="${seasonNum}" class="season-num w-full bg-white dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-1 text-xs text-center outline-none focus:border-crOrange text-black dark:text-white">
+                </div>
+                <div class="col-span-4">
+                    <label class="text-[8px] uppercase font-bold text-gray-500 block mb-1 text-center">Vistos / Total</label>
+                    <div class="flex items-center gap-1">
+                        <input type="number" placeholder="0" value="${seen}" class="season-seen w-full bg-white dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-1 text-xs text-center outline-none focus:border-crOrange text-black dark:text-white" oninput="updateProgressBar(this)">
+                        <span class="text-gray-500">/</span>
+                        <input type="number" placeholder="12" value="${total}" class="season-total w-full bg-white dark:bg-crDarkGrey border border-gray-300 dark:border-gray-700 rounded p-1 text-xs text-center outline-none focus:border-crOrange text-black dark:text-white" oninput="updateProgressBar(this)">
+                    </div>
+                </div>
+                <div class="col-span-4">
+                    <div class="h-6 w-full bg-gray-200 dark:bg-gray-800 rounded relative overflow-hidden shadow-inner">
+                        <div class="h-full bg-crOrange transition-all duration-500 progress-bar" style="width: ${progress}%"></div>
+                        <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-black dark:text-white mix-blend-difference progress-text">${Math.round(progress)}%</span>
+                    </div>
+                </div>
+                <div class="col-span-1 text-right">
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-red-500 transition-colors p-1"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            container.appendChild(row);
         }
 
-        function toggleFavoriteForm() {
-            const hiddenInput = document.getElementById('isFavorite');
-            const btn = document.getElementById('favBtnForm');
-            const isFav = hiddenInput.value === 'true';
-            hiddenInput.value = isFav ? 'false' : 'true';
-            btn.classList.toggle('heart-active', !isFav);
-            btn.classList.toggle('text-gray-300', isFav);
-            btn.classList.toggle('dark:text-gray-700', isFav);
+        function updateProgressBar(input) {
+            const row = input.closest('.season-row');
+            const seen = parseInt(row.querySelector('.season-seen').value) || 0;
+            const total = parseInt(row.querySelector('.season-total').value) || 0;
+            const bar = row.querySelector('.progress-bar');
+            const text = row.querySelector('.progress-text');
+            
+            const progress = total > 0 ? Math.min(100, (seen / total) * 100) : 0;
+            bar.style.width = progress + '%';
+            text.innerText = Math.round(progress) + '%';
         }
 
-        async function autoFetchAnime() {
-            const titleInput = document.getElementById('title');
-            const title = titleInput.value;
-            if (!title) return;
-            const magicBtn = document.getElementById('magicBtn');
-            const originalContent = magicBtn.innerHTML;
-            magicBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            try {
-                const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
-                const { data } = await res.json();
-                if (data && data[0]) {
-                    document.getElementById('imageUrl').value = data[0].images.jpg.large_image_url;
-                    if(!document.getElementById('notes').value) {
-                        document.getElementById('notes').value = data[0].synopsis || '';
+        function openModal(id = null) {
+            document.getElementById('seriesForm').reset();
+            document.getElementById('seasonsContainer').innerHTML = '';
+            document.getElementById('editingId').value = '';
+            document.getElementById('isFavorite').value = 'false';
+            document.getElementById('favBtnForm').classList.remove('heart-active');
+            document.getElementById('modalTitle').innerText = id ? 'Editar Anime' : 'Añadir Nuevo Anime';
+            
+            if (id) {
+                db.transaction([STORE_NAME]).objectStore(STORE_NAME).get(Number(id)).onsuccess = (e) => {
+                    const data = e.target.result;
+                    if(data) {
+                        document.getElementById('editingId').value = data.id;
+                        document.getElementById('title').value = data.title;
+                        document.getElementById('status').value = data.status || 'pendiente';
+                        document.getElementById('imageUrl').value = data.imageUrl || '';
+                        document.getElementById('crUrl').value = data.crUrl || '';
+                        document.getElementById('notes').value = data.notes || '';
+                        document.getElementById('isFavorite').value = data.isFavorite ? 'true' : 'false';
+                        if(data.isFavorite) document.getElementById('favBtnForm').classList.add('heart-active');
+                        
+                        if(data.seasons && data.seasons.length > 0) {
+                            data.seasons.forEach(s => addSeasonRow(s.name, s.seen, s.total));
+                        } else {
+                            addSeasonRow('1', 0, 0);
+                        }
                     }
-                }
-            } catch (err) { console.error(err); }
-            magicBtn.innerHTML = originalContent;
+                };
+            } else {
+                addSeasonRow('1', 0, 0);
+            }
+            document.getElementById('modal').classList.remove('hidden');
         }
+
+        document.getElementById('seriesForm').onsubmit = (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editingId').value;
+            
+            const seasons = [];
+            document.querySelectorAll('.season-row').forEach(row => {
+                seasons.push({
+                    name: row.querySelector('.season-num').value || '?',
+                    seen: parseInt(row.querySelector('.season-seen').value) || 0,
+                    total: parseInt(row.querySelector('.season-total').value) || 0
+                });
+            });
+
+            const data = {
+                title: document.getElementById('title').value,
+                status: document.getElementById('status').value,
+                imageUrl: document.getElementById('imageUrl').value || 'https://via.placeholder.com/300x450?text=Sin+Portada',
+                crUrl: document.getElementById('crUrl').value,
+                notes: document.getElementById('notes').value,
+                isFavorite: document.getElementById('isFavorite').value === 'true',
+                seasons: seasons,
+                updatedAt: new Date().toISOString()
+            };
+
+            const tx = db.transaction([STORE_NAME], 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            if (id) { 
+                data.id = Number(id); 
+                store.put(data); 
+            } else { 
+                data.createdAt = new Date().toISOString(); 
+                store.add(data); 
+            }
+            tx.oncomplete = () => { closeModal(); loadSeries(); };
+        };
+
+        function setFilterStatus(status) {
+            currentFilterStatus = status;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('border-crOrange', 'bg-crOrange', 'text-white');
+                btn.classList.add('border-gray-300', 'dark:border-gray-700', 'text-gray-500');
+            });
+            document.getElementById(`status-${status}`).classList.add('border-crOrange', 'bg-crOrange', 'text-white');
+            document.getElementById(`status-${status}`).classList.remove('text-gray-500');
+            loadSeries();
+        }
+
+        function loadSeries() {
+            if(!db) return;
+            const tx = db.transaction([STORE_NAME], 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            store.getAll().onsuccess = (e) => {
+                let series = e.target.result;
+                const search = document.getElementById('searchInput').value.toLowerCase();
+                
+                updateStats(series);
+
+                if (currentFilterStatus === 'fav') series = series.filter(s => s.isFavorite);
+                else if (currentFilterStatus !== 'all') series = series.filter(s => s.status === currentFilterStatus);
+                
+                if (search) series = series.filter(s => s.title.toLowerCase().includes(search));
+
+                // Ordenar por actualización más reciente
+                series.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+                renderGrid(series);
+            };
+        }
+
+        function renderGrid(series) {
+            const grid = document.getElementById('seriesGrid');
+            grid.innerHTML = '';
+            
+            if (series.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-20 text-center text-gray-500 opacity-50">
+                    <i class="fas fa-box-open text-6xl mb-4"></i>
+                    <p class="font-bold uppercase tracking-widest text-sm">No se encontraron animes</p>
+                </div>`;
+                return;
+            }
+
+            series.forEach(item => {
+                const totalSeen = item.seasons ? item.seasons.reduce((acc, s) => acc + s.seen, 0) : 0;
+                const totalEps = item.seasons ? item.seasons.reduce((acc, s) => acc + s.total, 0) : 0;
+                
+                const card = document.createElement('div');
+                card.className = 'anime-card rounded-xl overflow-hidden relative group shadow-lg cursor-pointer bg-white dark:bg-crBlack';
+                card.onclick = () => openModal(item.id);
+                
+                card.innerHTML = `
+                    <div class="poster-container">
+                        <img src="${item.imageUrl}" class="poster-image" alt="${item.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=Error+Img'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent p-3 flex flex-col justify-end opacity-90 group-hover:opacity-100 transition-opacity">
+                            <h3 class="font-bold text-[11px] leading-tight text-white mb-1 line-clamp-2">${item.title}</h3>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[8px] font-black uppercase ${getStatusColor(item.status)} px-1.5 py-0.5 rounded-sm">${item.status.replace('-', ' ')}</span>
+                                <span class="text-[9px] font-bold text-white shadow-sm bg-black/40 px-1 rounded">${totalSeen}/${totalEps} EPS</span>
+                            </div>
+                        </div>
+                        ${item.isFavorite ? '<i class="fas fa-heart absolute top-2 right-2 text-red-500 text-sm drop-shadow-md"></i>' : ''}
+                        <div class="absolute top-2 left-2 bg-crOrange text-white text-[8px] px-1.5 py-0.5 rounded font-bold opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">DETALLES</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function getStatusColor(status) {
+            if (status === 'visto') return 'bg-green-500 text-white';
+            if (status === 'en-progreso') return 'bg-blue-500 text-white';
+            return 'bg-gray-500 text-white';
+        }
+
+        function updateStats(all) {
+            document.getElementById('statTotal').innerText = all.length;
+            document.getElementById('statVisto').innerText = all.filter(s => s.status === 'visto').length;
+            document.getElementById('statFav').innerText = all.filter(s => s.isFavorite).length;
+            document.getElementById('statProgreso').innerText = all.filter(s => s.status === 'en-progreso').length;
+        }
+
+        // --- FUNCIONALIDADES API E IA ---
 
         async function generateDescriptionWithIA() {
             const title = document.getElementById('title').value;
-            if (!title) {
-                alert("Primero ingresa el título del anime");
-                return;
-            }
-            const genBtn = document.getElementById('genDescBtn');
-            const originalText = genBtn.innerHTML;
-            genBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
-            
-            const prompt = `Escribe una sinopsis breve y atractiva de 3 a 5 oraciones para el anime titulado "${title}". Enfócate en la trama principal sin spoilers. Idioma: Español.`;
+            const iaBtn = document.getElementById('iaBtn');
+            if (!title) return;
+
+            iaBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Generando...';
+            iaBtn.disabled = true;
+
+            const prompt = `Escribe una sinopsis muy breve (máximo 3 líneas) para el anime "${title}" en español. Enfócate en la premisa principal de forma emocionante.`;
             
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
@@ -401,263 +451,62 @@
             } catch (error) {
                 console.error("IA Error:", error);
             } finally {
-                genBtn.innerHTML = originalText;
+                iaBtn.innerHTML = '<i class="fas fa-robot mr-1"></i> Generar con IA';
+                iaBtn.disabled = false;
             }
         }
 
-        function openModal(id = null) {
-            document.getElementById('seriesForm').reset();
-            document.getElementById('editingId').value = '';
-            document.getElementById('isFavorite').value = 'false';
-            document.getElementById('modalTitle').innerText = "Añadir Serie";
-            document.getElementById('favBtnForm').className = 'text-2xl text-gray-300 dark:text-gray-700 hover:scale-110 transition-all';
-            setupStarRating(5);
+        async function autoFetchAnime() {
+            const title = document.getElementById('title').value;
+            if (!title) return;
             
-            if (id) {
-                db.transaction([STORE_NAME]).objectStore(STORE_NAME).get(Number(id)).onsuccess = (e) => {
-                    const data = e.target.result;
-                    if(data) {
-                        document.getElementById('editingId').value = data.id;
-                        document.getElementById('title').value = data.title;
-                        document.getElementById('status').value = data.status;
-                        document.getElementById('imageUrl').value = data.imageUrl;
-                        document.getElementById('episodes').value = data.episodes || 0;
-                        document.getElementById('notes').value = data.notes || '';
-                        document.getElementById('crUrl').value = data.crUrl || '';
-                        document.getElementById('isFavorite').value = data.isFavorite ? 'true' : 'false';
-                        if(data.isFavorite) document.getElementById('favBtnForm').classList.add('heart-active');
-                        setupStarRating(data.rating || 5);
-                        document.getElementById('modalTitle').innerText = "Editar Serie";
+            const btn = event.currentTarget;
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
+                const { data } = await res.json();
+                if (data && data[0]) {
+                    const anime = data[0];
+                    document.getElementById('imageUrl').value = anime.images.jpg.large_image_url;
+                    if(!document.getElementById('notes').value) {
+                        document.getElementById('notes').value = anime.synopsis || '';
                     }
+                    // Si el estado es pendiente y tiene episodios conocidos, podríamos pre-rellenar
+                    if (anime.episodes && document.querySelectorAll('.season-row').length === 1) {
+                        const firstRow = document.querySelector('.season-row');
+                        const totalInput = firstRow.querySelector('.season-total');
+                        if (parseInt(totalInput.value) === 0) totalInput.value = anime.episodes;
+                        updateProgressBar(totalInput);
+                    }
+                }
+            } catch (err) {
+                console.error("API Error:", err);
+            } finally {
+                btn.innerHTML = originalIcon;
+            }
+        }
+
+        function toggleFavoriteForm() {
+            const isFav = document.getElementById('isFavorite').value === 'true';
+            document.getElementById('isFavorite').value = isFav ? 'false' : 'true';
+            document.getElementById('favBtnForm').classList.toggle('heart-active', !isFav);
+        }
+
+        function closeModal() { 
+            document.getElementById('modal').classList.add('hidden'); 
+        }
+
+        function deleteSeries(id) {
+            if (confirm('¿Estás seguro de que deseas eliminar este anime de tu lista?')) {
+                const tx = db.transaction([STORE_NAME], 'readwrite');
+                tx.objectStore(STORE_NAME).delete(id);
+                tx.oncomplete = () => {
+                    loadSeries();
+                    openDebugModal(); // Refresh table if open
                 };
             }
-            document.getElementById('modal').classList.remove('hidden');
-        }
-
-        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
-
-        document.getElementById('seriesForm').onsubmit = (e) => {
-            e.preventDefault();
-            const id = document.getElementById('editingId').value;
-            const data = {
-                title: document.getElementById('title').value,
-                status: document.getElementById('status').value,
-                rating: parseInt(document.getElementById('rating').value),
-                episodes: parseInt(document.getElementById('episodes').value) || 0,
-                notes: document.getElementById('notes').value,
-                crUrl: document.getElementById('crUrl').value,
-                isFavorite: document.getElementById('isFavorite').value === 'true',
-                imageUrl: document.getElementById('imageUrl').value || 'https://via.placeholder.com/300x450?text=No+Image',
-                updatedAt: new Date().toISOString()
-            };
-            const tx = db.transaction([STORE_NAME], 'readwrite');
-            const store = tx.objectStore(STORE_NAME);
-            if (id) { data.id = Number(id); store.put(data); }
-            else { data.createdAt = new Date().toISOString(); store.add(data); }
-            tx.oncomplete = () => { closeModal(); loadSeries(); };
-        };
-
-        function setFilterStatus(status) {
-            currentFilterStatus = status;
-            document.querySelectorAll('.filter-btn-status').forEach(btn => {
-                btn.classList.remove('border-crOrange', 'bg-crOrange', 'text-white');
-                btn.classList.add('border-gray-300', 'dark:border-gray-700', 'text-gray-600', 'dark:text-gray-400');
-            });
-            document.getElementById(`status-${status}`).classList.add('border-crOrange', 'bg-crOrange', 'text-white');
-            loadSeries();
-        }
-
-        function loadSeries() {
-            if(!db) return;
-            db.transaction([STORE_NAME]).objectStore(STORE_NAME).getAll().onsuccess = (e) => {
-                let series = e.target.result;
-                const search = document.getElementById('searchInput').value.toLowerCase();
-                const sort = document.getElementById('sortSelect').value;
-
-                if (currentFilterStatus === 'fav') series = series.filter(s => s.isFavorite);
-                else if (currentFilterStatus !== 'all') series = series.filter(s => s.status === currentFilterStatus);
-                
-                if (search) series = series.filter(s => s.title.toLowerCase().includes(search));
-
-                if (sort === 'alpha') series.sort((a, b) => a.title.localeCompare(b.title));
-                else if (sort === 'rating') series.sort((a, b) => b.rating - a.rating);
-                else series.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
-
-                updateStats(e.target.result);
-                renderGrid(series);
-            };
-        }
-
-        function renderGrid(series) {
-            const grid = document.getElementById('seriesGrid');
-            const empty = document.getElementById('emptyState');
-            grid.innerHTML = '';
-            
-            if (series.length === 0) {
-                empty.classList.remove('hidden');
-                return;
-            }
-            empty.classList.add('hidden');
-
-            series.forEach(item => {
-                const crLink = item.crUrl ? item.crUrl : `https://www.crunchyroll.com/search?q=${encodeURIComponent(item.title)}`;
-                const card = document.createElement('div');
-                card.className = 'anime-card rounded-xl overflow-hidden relative group flex flex-col shadow-lg cursor-pointer';
-                card.onclick = () => openModal(item.id);
-                
-                card.innerHTML = `
-                    <div class="poster-container">
-                        <img src="${item.imageUrl}" class="poster-image transition-transform duration-700 group-hover:scale-105" onerror="this.src='https://via.placeholder.com/300x450?text=Error'">
-                        <div class="absolute top-2 left-2 z-10">
-                            <span class="cr-badge text-[8px] font-black text-white px-2 py-1 rounded shadow-lg uppercase tracking-wider flex items-center gap-1">
-                                <i class="fas fa-play-circle"></i> Crunchy
-                            </span>
-                        </div>
-                        <div class="absolute top-2 right-2 flex flex-col gap-2 z-20">
-                            <button onclick="event.stopPropagation(); moveToTrash(${item.id})" title="Papelera" class="bg-black/60 hover:bg-red-500 text-white w-7 h-7 rounded-full flex items-center justify-center transition-colors">
-                                <i class="fas fa-trash-alt text-[10px]"></i>
-                            </button>
-                            <button onclick="event.stopPropagation(); toggleFav(${item.id})" class="bg-black/60 hover:bg-white/20 w-7 h-7 rounded-full flex items-center justify-center transition-all ${item.isFavorite ? 'heart-active' : 'text-white'}">
-                                <i class="fas fa-heart text-[10px]"></i>
-                            </button>
-                        </div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-3">
-                            <a href="${crLink}" target="_blank" onclick="event.stopPropagation()" class="bg-crOrange hover:bg-white hover:text-crOrange text-white text-[10px] font-black py-2 rounded mb-2 text-center transition-all uppercase">
-                                <i class="fas fa-external-link-alt mr-1"></i> Ver ahora
-                            </a>
-                            <p class="text-[9px] text-gray-300 line-clamp-3 italic leading-tight">${item.notes || 'Sin descripción disponible.'}</p>
-                        </div>
-                    </div>
-                    <div class="p-3 bg-white dark:bg-crBlack">
-                        <h3 class="font-bold text-xs truncate mb-1 text-black dark:text-white">${item.title}</h3>
-                        <div class="flex items-center justify-between">
-                            <span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${item.status === 'visto' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}">
-                                ${item.episodes || 0} EPS
-                            </span>
-                            <div class="flex text-[8px] text-yellow-500">
-                                ${Array(5).fill(0).map((_, i) => `<i class="${i < item.rating ? 'fas' : 'far'} fa-star"></i>`).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function toggleFav(id) {
-            const tx = db.transaction([STORE_NAME], 'readwrite');
-            const store = tx.objectStore(STORE_NAME);
-            store.get(id).onsuccess = (e) => {
-                const item = e.target.result;
-                if(item) {
-                    item.isFavorite = !item.isFavorite;
-                    store.put(item);
-                }
-            };
-            tx.oncomplete = () => loadSeries();
-        }
-
-        function moveToTrash(id) {
-            const tx = db.transaction([STORE_NAME, TRASH_STORE], 'readwrite');
-            const seriesStore = tx.objectStore(STORE_NAME);
-            const trashStore = tx.objectStore(TRASH_STORE);
-            seriesStore.get(id).onsuccess = (e) => {
-                const item = e.target.result;
-                if (item) {
-                    trashStore.put(item);
-                    seriesStore.delete(id);
-                    lastDeletedId = id;
-                    showUndoToast();
-                }
-            };
-            tx.oncomplete = () => { loadSeries(); updateTrashBadge(); };
-        }
-
-        function showUndoToast() {
-            const toast = document.getElementById('undoToast');
-            toast.classList.remove('hidden');
-            clearTimeout(undoTimeout);
-            undoTimeout = setTimeout(() => toast.classList.add('hidden'), 6000);
-        }
-
-        function undoDelete() {
-            if (!lastDeletedId) return;
-            const tx = db.transaction([STORE_NAME, TRASH_STORE], 'readwrite');
-            const seriesStore = tx.objectStore(STORE_NAME);
-            const trashStore = tx.objectStore(TRASH_STORE);
-            trashStore.get(lastDeletedId).onsuccess = (e) => {
-                const item = e.target.result;
-                if (item) {
-                    seriesStore.add(item);
-                    trashStore.delete(lastDeletedId);
-                }
-            };
-            tx.oncomplete = () => {
-                document.getElementById('undoToast').classList.add('hidden');
-                loadSeries(); updateTrashBadge(); lastDeletedId = null;
-            };
-        }
-
-        function openTrashModal() { renderTrashList(); document.getElementById('trashModal').classList.remove('hidden'); }
-        function closeTrashModal() { document.getElementById('trashModal').classList.add('hidden'); }
-
-        function renderTrashList() {
-            const list = document.getElementById('trashList');
-            list.innerHTML = '';
-            db.transaction([TRASH_STORE]).objectStore(TRASH_STORE).getAll().onsuccess = (e) => {
-                const items = e.target.result;
-                if (items.length === 0) list.innerHTML = '<p class="text-center text-gray-500 py-10 italic">La papelera está vacía</p>';
-                else items.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between p-3 bg-gray-50 dark:bg-crDarkGrey rounded-xl border border-gray-200 dark:border-gray-800';
-                    div.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <img src="${item.imageUrl}" class="w-10 h-14 object-cover rounded shadow" onerror="this.src='https://via.placeholder.com/100'">
-                            <p class="font-bold text-xs text-black dark:text-white">${item.title}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="restoreFromTrash(${item.id})" title="Restaurar" class="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors"><i class="fas fa-undo"></i></button>
-                            <button onclick="permanentDelete(${item.id})" title="Borrar para siempre" class="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><i class="fas fa-times-circle"></i></button>
-                        </div>
-                    `;
-                    list.appendChild(div);
-                });
-            };
-        }
-
-        function restoreFromTrash(id) {
-            const tx = db.transaction([STORE_NAME, TRASH_STORE], 'readwrite');
-            const trashStore = tx.objectStore(TRASH_STORE);
-            const seriesStore = tx.objectStore(STORE_NAME);
-            trashStore.get(id).onsuccess = (e) => {
-                const item = e.target.result;
-                if(item) { seriesStore.add(item); trashStore.delete(id); }
-            };
-            tx.oncomplete = () => { renderTrashList(); loadSeries(); updateTrashBadge(); };
-        }
-
-        function permanentDelete(id) {
-            if (!confirm('¿Eliminar permanentemente?')) return;
-            const tx = db.transaction([TRASH_STORE], 'readwrite');
-            tx.objectStore(TRASH_STORE).delete(id);
-            tx.oncomplete = () => { renderTrashList(); updateTrashBadge(); };
-        }
-
-        function emptyTrash() {
-            if (!confirm('¿Vaciar papelera?')) return;
-            const tx = db.transaction([TRASH_STORE], 'readwrite');
-            tx.objectStore(TRASH_STORE).clear();
-            tx.oncomplete = () => { renderTrashList(); updateTrashBadge(); };
-        }
-
-        function updateTrashBadge() {
-            if(!db) return;
-            db.transaction([TRASH_STORE]).objectStore(TRASH_STORE).count().onsuccess = (e) => {
-                const count = e.target.result;
-                const badge = document.getElementById('trashCount');
-                badge.innerText = count;
-                badge.classList.toggle('hidden', count === 0);
-            };
         }
 
         function openDebugModal() {
@@ -665,63 +514,23 @@
             tbody.innerHTML = '';
             db.transaction([STORE_NAME]).objectStore(STORE_NAME).getAll().onsuccess = (e) => {
                 const all = e.target.result;
+                if (all.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-gray-500 italic">No hay datos registrados</td></tr>';
+                }
                 all.forEach(item => {
-                    const tr = document.createElement('tr');
-                    tr.className = "border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors";
-                    tr.innerHTML = `
-                        <td class="py-3 px-4 font-mono text-crOrange">${item.id}</td>
-                        <td class="py-3 px-4 font-bold">${item.title}</td>
-                        <td class="py-3 px-4"><span class="text-[10px] uppercase px-1.5 py-0.5 rounded ${item.status === 'visto' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}">${item.status}</span></td>
-                        <td class="py-3 px-4">${item.rating}/5</td>
-                        <td class="py-3 px-4">${item.isFavorite ? '❤️' : '—'}</td>
-                        <td class="py-3 px-4 text-gray-500">${new Date(item.createdAt).toLocaleDateString()}</td>
-                    `;
-                    tbody.appendChild(tr);
+                    tbody.innerHTML += `
+                        <tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                            <td class="p-4 font-mono text-crOrange">${item.id}</td>
+                            <td class="p-4 font-bold">${item.title}</td>
+                            <td class="p-4"><span class="px-2 py-0.5 rounded text-[10px] ${getStatusColor(item.status)}">${item.status}</span></td>
+                            <td class="p-4">${item.isFavorite ? '<i class="fas fa-heart text-red-500"></i>' : '<i class="far fa-heart text-gray-300"></i>'}</td>
+                            <td class="p-4">
+                                <button onclick="deleteSeries(${item.id})" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded transition-all"><i class="fas fa-trash-alt"></i></button>
+                            </td>
+                        </tr>`;
                 });
+                document.getElementById('debugModal').classList.remove('hidden');
             };
-            document.getElementById('debugModal').classList.remove('hidden');
-        }
-
-        function closeDebugModal() { document.getElementById('debugModal').classList.add('hidden'); }
-
-        function updateStats(all) {
-            document.getElementById('statTotal').innerText = all.length;
-            document.getElementById('statVisto').innerText = all.filter(s => s.status === 'visto').length;
-            document.getElementById('statFav').innerText = all.filter(s => s.isFavorite).length;
-            document.getElementById('statEps').innerText = all.reduce((acc, curr) => acc + (curr.episodes || 0), 0);
-        }
-
-        function exportData() {
-            db.transaction([STORE_NAME], 'readonly').objectStore(STORE_NAME).getAll().onsuccess = (e) => {
-                const blob = new Blob([JSON.stringify(e.target.result, null, 2)], { type: 'application/json' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `d-tracker-backup_${new Date().getTime()}.json`;
-                a.click();
-            };
-        }
-
-        function importData(input) {
-            if(!input.files.length) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    const tx = db.transaction([STORE_NAME], 'readwrite');
-                    const store = tx.objectStore(STORE_NAME);
-                    // Lógica corregida: Eliminamos el ID del importado para que IndexedDB asigne uno nuevo automáticamente
-                    data.forEach(item => { 
-                        const newItem = {...item}; 
-                        delete newItem.id; 
-                        store.add(newItem); 
-                    });
-                    tx.oncomplete = () => {
-                        loadSeries();
-                        alert("Datos importados con éxito. Se han generado nuevos IDs automáticos.");
-                    };
-                } catch(err) { alert("Archivo JSON no válido o corrupto"); }
-            };
-            reader.readAsText(input.files[0]);
         }
     </script>
 </body>
